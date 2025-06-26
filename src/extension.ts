@@ -5,7 +5,7 @@ import traverse from '@babel/traverse';
 export function activate(context: vscode.ExtensionContext) {
   const disposable = vscode.commands.registerCommand('contextualConsoleLog.insertLog', async () => {
     const editor = vscode.window.activeTextEditor;
-    if (!editor) return;
+    if (!editor) {return;}
 
     const doc = editor.document;
     const pos = editor.selection.active;
@@ -22,6 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
     let funcName: string | null = null;
     let funcArgs: string[] = [];
     let compName: string | null = null;
+
     let props: string[] = [];
     let states: string[] = [];
     let refs: string[] = [];
@@ -29,66 +30,79 @@ export function activate(context: vscode.ExtensionContext) {
     let reducers: string[] = [];
     let locals: string[] = [];
 
+    let currentComponentNode: any = null;
+
     traverse(ast, {
       enter(path) {
         const node = path.node;
-        if (!node.loc) return;
+        if (!node.loc) {return;}
 
+        // Cursor position logic
         if (positionIn(node.loc, pos, doc)) {
+          // Regular function
           if (path.isFunctionDeclaration() || path.isFunctionExpression() || path.isArrowFunctionExpression()) {
             const parent = path.parent;
             const name = (node as any).id?.name ||
               (parent.type === 'VariableDeclarator' && (parent as any).id?.name) ||
               'anonymous';
-            isInsideRegularFunction = true;
+
             funcName = name;
             funcArgs = (node as any).params?.map((p: any) => p.name || doc.getText(p)) || [];
+            isInsideRegularFunction = true;
           }
 
+          // React component detection (with return statement)
           if (
             path.isFunctionDeclaration() ||
             path.isFunctionExpression() ||
             path.isArrowFunctionExpression()
           ) {
-            const returnNode = (node as any).body.body?.find((n: any) => n.type === 'ReturnStatement');
+            const returnNode = (node as any).body?.body?.find((n: any) => n.type === 'ReturnStatement');
             if (returnNode) {
               compName = (node as any).id?.name ||
-                (path.parent.type === 'VariableDeclarator' && (path.parent as any).id.name) ||
+                (path.parent.type === 'VariableDeclarator' && (path.parent as any).id?.name) ||
                 'AnonymousComponent';
+              props = (node as any).params?.map((p: any) => p.name || doc.getText(p)) || [];
               isInsideReactComponent = true;
-
-              const rawProps = (node as any).params || [];
-              props = rawProps.map((p: any) => p.name || doc.getText(p));
+              currentComponentNode = node;
             }
           }
         }
 
-        if (path.isVariableDeclarator() && path.node.init?.type === 'CallExpression') {
-          const callee = (path.node.init.callee as any).name;
+        // Collect contextual variables if inside a React component
+        if (
+          isInsideReactComponent &&
+          currentComponentNode &&
+          path.isVariableDeclarator() &&
+          path.findParent(p => p.node === currentComponentNode)
+        ) {
           const name = (path.node.id as any).name;
-          if (callee === 'useState') states.push(name);
-          if (callee === 'useRef') refs.push(name);
-          if (callee === 'useContext') contexts.push(name);
-          if (callee === 'useReducer') {
-            const [stateVar, dispatchVar] = (path.node.id as any).elements.map((e: any) => e.name);
-            reducers.push(`${stateVar}: ${stateVar}, ${dispatchVar}: ${dispatchVar}`);
-          }
-        }
+          const init = path.node.init;
 
-        if (path.isVariableDeclarator() && path.node.init && positionIn(path.node.loc, pos, doc)) {
-          const name = (path.node.id as any).name;
-          if (
-            !states.includes(name) &&
-            !refs.includes(name) &&
-            !contexts.includes(name) &&
-            !reducers.some(r => r.includes(name))
-          ) {
-            locals.push(name);
+          if (!init) {return;}
+
+          if (init.type === 'CallExpression') {
+            const callee = (init.callee as any).name;
+            if (callee === 'useState') {
+              if (!states.includes(name)) {states.push(name);}
+            } else if (callee === 'useRef') {
+              if (!refs.includes(name)) {refs.push(name);}
+            } else if (callee === 'useContext') {
+              if (!contexts.includes(name)) {contexts.push(name);}
+            } else if (callee === 'useReducer') {
+              const [stateVar, dispatchVar] = (path.node.id as any).elements.map((e: any) => e.name);
+              reducers.push(`${stateVar}: ${stateVar}, ${dispatchVar}: ${dispatchVar}`);
+            } else {
+              if (!locals.includes(name)) {locals.push(name);}
+            }
+          } else {
+            if (!locals.includes(name)) {locals.push(name);}
           }
         }
       }
     });
 
+    // Build final console.log
     let logLine = '';
 
     if (isInsideRegularFunction) {
@@ -97,14 +111,18 @@ export function activate(context: vscode.ExtensionContext) {
     } else if (isInsideReactComponent && compName) {
       const logParts: string[] = [];
 
-      if (props.length) logParts.push(`props: { ${props.join(', ')} }`);
-      if (states.length) logParts.push(`state: { ${states.join(', ')} }`);
-      if (refs.length) logParts.push(`refs: { ${refs.map(r => `${r}: ${r}.current`).join(', ')} }`);
-      if (contexts.length) logParts.push(`context: { ${contexts.join(', ')} }`);
-      if (reducers.length) logParts.push(`reducer: { ${reducers.join(', ')} }`);
-      if (locals.length) logParts.push(`locals: { ${locals.join(', ')} }`);
+      if (props.length) {logParts.push(`props: { ${props.join(', ')} }`);}
+      if (states.length) {logParts.push(`state: { ${states.join(', ')} }`);}
+      if (refs.length) {logParts.push(`refs: { ${refs.map(r => `${r}: ${r}.current`).join(', ')} }`);}
+      if (contexts.length) {logParts.push(`context: { ${contexts.join(', ')} }`);}
+      if (reducers.length) {logParts.push(`reducer: { ${reducers.join(', ')} }`);}
+      if (locals.length) {logParts.push(`locals: { ${locals.join(', ')} }`);}
 
-      logLine = `console.log('[${fileName} > ${compName}]', {\n  ${logParts.join(',\n  ')}\n});`;
+      if (logParts.length > 0) {
+        logLine = `console.log('[${fileName} > ${compName}]', {\n  ${logParts.join(',\n  ')}\n});`;
+      } else {
+        logLine = `console.log('[${fileName} > ${compName}]', {});`;
+      }
     } else {
       logLine = `console.log('[${fileName}]');`;
     }
