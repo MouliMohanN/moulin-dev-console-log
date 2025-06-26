@@ -60,6 +60,20 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
           locals: [],
         };
 
+        // ✅ Extract props from first parameter
+        const firstParam = (node as any).params?.[0];
+        if (t.isIdentifier(firstParam)) {
+          variables.props.push(firstParam.name);
+        } else if (t.isObjectPattern(firstParam)) {
+          firstParam.properties.forEach(prop => {
+            if (t.isObjectProperty(prop) && t.isIdentifier(prop.key)) {
+              variables.props.push(prop.key.name);
+            } else if (t.isRestElement(prop) && t.isIdentifier(prop.argument)) {
+              variables.props.push(prop.argument.name);
+            }
+          });
+        }
+
         const insertPos = findReturnInsertPosition(node, doc);
 
         path.traverse({
