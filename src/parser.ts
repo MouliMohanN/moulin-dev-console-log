@@ -78,7 +78,7 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
             const names = extractVariableNames(id);
 
             if (t.isCallExpression(init)) {
-              const callee = (init.callee as any).name;
+              const callee = (init.callee as any).name || (init.callee as any).property?.name;
 
               switch (callee) {
                 case 'useState':
