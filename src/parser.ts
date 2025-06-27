@@ -71,7 +71,6 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
 
         if (firstParam && (t.isObjectPattern(firstParam) || t.isIdentifier(firstParam))) {
           args = extractVariableNames(firstParam);
-          variables.props = args;
         }
 
         logger.log('parser.ts ~ parseCodeContext ~ traverse ~ enter', {
