@@ -16,6 +16,12 @@ function writeLog(level: 'log' | 'warn' | 'error', message: string, data?: any) 
 
   outputChannel?.appendLine(formatted);
   console[level](formatted, data ?? '');
+
+  if (level === 'warn') {
+    vscode.window.showWarningMessage(messageWithTag);
+  } else if (level === 'error') {
+    vscode.window.showErrorMessage(messageWithTag);
+  }
 }
 
 export const logger = {

@@ -1,5 +1,5 @@
-import * as vscode from 'vscode';
 import * as t from '@babel/types';
+import * as vscode from 'vscode';
 
 export function positionIn(loc: t.SourceLocation, pos: vscode.Position, doc: vscode.TextDocument): boolean {
   const start = new vscode.Position(loc.start.line - 1, loc.start.column);
@@ -25,8 +25,12 @@ export function findReturnInsertPosition(node: t.Function, doc: vscode.TextDocum
 }
 
 export function extractVariableNames(id: any): string[] {
-  if (!id) {return [];}
-  if (id.name) {return [id.name];}
+  if (!id) {
+    return [];
+  }
+  if (id.name) {
+    return [id.name];
+  }
   if (Array.isArray(id.elements)) {
     return id.elements.map((el: any) => el?.name).filter(Boolean);
   }

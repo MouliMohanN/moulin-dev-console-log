@@ -2,8 +2,9 @@ import { parse } from '@babel/parser';
 import traverse from '@babel/traverse';
 import * as t from '@babel/types';
 import * as vscode from 'vscode';
-import { positionIn, findReturnInsertPosition } from './utils';
+import { logger } from './logger';
 import { CodeContext } from './types';
+import { findReturnInsertPosition, positionIn } from './utils';
 
 type VariableBuckets = {
   props: string[];
@@ -21,11 +22,13 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
   });
 
   let context: CodeContext | null = null;
-
+  logger.log('parser.ts ~ parseCodeContext ~ before traverse ~ ast', { ast });
   traverse(ast, {
     enter(path) {
       const node = path.node;
-      if (!node.loc || context) {return;}
+      if (!node.loc || context) {
+        return;
+      }
 
       if (
         positionIn(node.loc, cursor, doc) &&
@@ -49,8 +52,6 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
           },
         });
 
-        const args = (node as any).params?.map((p: any) => p.name || doc.getText(p)) || [];
-
         const variables: VariableBuckets = {
           props: [],
           state: [],
@@ -60,12 +61,30 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
           locals: [],
         };
 
+        // const args = (node as any).params?.map((p: any) => p.name || doc.getText(p)) || [];
+
         // ✅ Extract props from first parameter
-        const firstParam = (node as any).params?.[0];
+        // const firstParam = (node as any).params?.[0];
+
+        let args: string[] = [];
+        const firstParam = node.params?.[0];
+
+        if (firstParam && (t.isObjectPattern(firstParam) || t.isIdentifier(firstParam))) {
+          args = extractVariableNames(firstParam);
+          variables.props = args;
+        }
+
+        logger.log('parser.ts ~ parseCodeContext ~ traverse ~ enter', {
+          name,
+          isComponent,
+          args,
+          nodeParams: (node as any).params,
+        });
+
         if (t.isIdentifier(firstParam)) {
           variables.props.push(firstParam.name);
         } else if (t.isObjectPattern(firstParam)) {
-          firstParam.properties.forEach(prop => {
+          firstParam.properties.forEach((prop) => {
             if (t.isObjectProperty(prop) && t.isIdentifier(prop.key)) {
               variables.props.push(prop.key.name);
             } else if (t.isRestElement(prop) && t.isIdentifier(prop.argument)) {
@@ -76,16 +95,14 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
 
         const insertPos = findReturnInsertPosition(node, doc);
 
+        logger.log('parser.ts ~ parseCodeContext ~ traverse ~ insertPos', { insertPos, firstParam, variables });
+
         path.traverse({
           VariableDeclarator(inner) {
             const id = inner.node.id;
             const init = inner.node.init;
 
-            if (
-              !t.isIdentifier(id) &&
-              !t.isArrayPattern(id) &&
-              !t.isObjectPattern(id)
-            ) {
+            if (!t.isIdentifier(id) && !t.isArrayPattern(id) && !t.isObjectPattern(id)) {
               return;
             }
 
@@ -101,10 +118,10 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
                   }
                   break;
                 case 'useRef':
-                  names.forEach(n => variables.refs.push(n));
+                  names.forEach((n) => variables.refs.push(n));
                   break;
                 case 'useContext':
-                  names.forEach(n => variables.context.push(n));
+                  names.forEach((n) => variables.context.push(n));
                   break;
                 case 'useReducer':
                   if (names.length >= 2) {
@@ -112,10 +129,10 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
                   }
                   break;
                 default:
-                  names.forEach(n => variables.locals.push(n));
+                  names.forEach((n) => variables.locals.push(n));
               }
             } else {
-              names.forEach(n => variables.locals.push(n));
+              names.forEach((n) => variables.locals.push(n));
             }
           },
         });
@@ -140,13 +157,13 @@ function extractVariableNames(id: t.Identifier | t.ArrayPattern | t.ObjectPatter
   if (t.isIdentifier(id)) {
     names.push(id.name);
   } else if (t.isArrayPattern(id)) {
-    id.elements.forEach(el => {
+    id.elements.forEach((el) => {
       if (t.isIdentifier(el)) {
         names.push(el.name);
       }
     });
   } else if (t.isObjectPattern(id)) {
-    id.properties.forEach(prop => {
+    id.properties.forEach((prop) => {
       if (t.isObjectProperty(prop) && t.isIdentifier(prop.value)) {
         names.push(prop.value.name);
       } else if (t.isRestElement(prop) && t.isIdentifier(prop.argument)) {
