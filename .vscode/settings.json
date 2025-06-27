@@ -1,13 +1,40 @@
 // Place your settings in this file to overwrite default and user settings.
 {
-    "files.exclude": {
-        "out": false, // set this to true to hide the "out" folder with the compiled JS files
-        "dist": false // set this to true to hide the "dist" folder with the compiled JS files
-    },
-    "search.exclude": {
-        "out": true, // set this to false to include "out" folder in search results
-        "dist": true // set this to false to include "dist" folder in search results
-    },
-    // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
-    "typescript.tsc.autoDetect": "off"
+  "files.exclude": {
+    "out": false, // set this to true to hide the "out" folder with the compiled JS files
+    "dist": false // set this to true to hide the "dist" folder with the compiled JS files
+  },
+  "search.exclude": {
+    "out": true, // set this to false to include "out" folder in search results
+    "dist": true // set this to false to include "dist" folder in search results
+  },
+  // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
+  "typescript.tsc.autoDetect": "off",
+  "turboConsoleLog.includeFilename": true,
+  "turboConsoleLog.addSemicolonInTheEnd": true,
+  "turboConsoleLog.logMessagePrefix": "",
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnType": true,
+  "prettier.configPath": ".prettierrc.js",
+  "eslint.codeActionsOnSave.mode": "all",
+  "eslint.codeAction.showDocumentation": {
+    "enable": true
+  },
+  "editor.codeActionsOnSave": {
+    // "source.removeUnused.ts": "explicit",
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.pasteAs.preferences": ["text.updateImports.jsts"],
+  "editor.pasteAs.enabled": true,
+  "eslint.enable": true,
+  "eslint.run": "onSave",
+  "terminal.integrated.gpuAcceleration": "on",
+  "terminal.integrated.shellIntegration.decorationsEnabled": "both",
+  "terminal.integrated.shellIntegration.enabled": true,
+  "terminal.integrated.suggest.enabled": true,
+  "terminal.integrated.suggest.suggestOnTriggerCharacters": true,
+  "typescript.updateImportsOnPaste.enabled": true,
+  "typescript.experimental.expandableHover": true,
+  "emmet.triggerExpansionOnTab": true
 }
