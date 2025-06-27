@@ -23,12 +23,11 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
 
   let context: CodeContext | null = null;
   logger.log('parser.ts ~ parseCodeContext ~ before traverse ~ ast', { ast });
+
   traverse(ast, {
     enter(path) {
       const node = path.node;
-      if (!node.loc || context) {
-        return;
-      }
+      if (!node.loc || context) {return;}
 
       if (
         positionIn(node.loc, cursor, doc) &&
@@ -61,11 +60,6 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
           locals: [],
         };
 
-        // const args = (node as any).params?.map((p: any) => p.name || doc.getText(p)) || [];
-
-        // ✅ Extract props from first parameter
-        // const firstParam = (node as any).params?.[0];
-
         let args: string[] = [];
         const firstParam = node.params?.[0];
 
@@ -80,16 +74,8 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
           nodeParams: (node as any).params,
         });
 
-        if (t.isIdentifier(firstParam)) {
-          variables.props.push(firstParam.name);
-        } else if (t.isObjectPattern(firstParam)) {
-          firstParam.properties.forEach((prop) => {
-            if (t.isObjectProperty(prop) && t.isIdentifier(prop.key)) {
-              variables.props.push(prop.key.name);
-            } else if (t.isRestElement(prop) && t.isIdentifier(prop.argument)) {
-              variables.props.push(prop.argument.name);
-            }
-          });
+        if (isComponent) {
+          variables.props = args;
         }
 
         const insertPos = findReturnInsertPosition(node, doc);
@@ -101,9 +87,7 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
             const id = inner.node.id;
             const init = inner.node.init;
 
-            if (!t.isIdentifier(id) && !t.isArrayPattern(id) && !t.isObjectPattern(id)) {
-              return;
-            }
+            if (!t.isIdentifier(id) && !t.isArrayPattern(id) && !t.isObjectPattern(id)) {return;}
 
             const names = extractVariableNames(id);
 
