@@ -2,9 +2,12 @@ import * as vscode from 'vscode';
 import { parseCodeContext } from './parser';
 import { generateConsoleLog } from './logGenerator';
 import { positionIn } from './utils';
+import { initLogger, logger } from './logger';
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log('✅ Contextual Console Log Extension Activated');
+  initLogger(true);
+  logger.log('✅ Contextual Console Log Extension Activated');
+  
   const disposable = vscode.commands.registerCommand('contextualConsoleLog.insertLog', async () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor || editor.selections.length !== 1) {
