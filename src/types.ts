@@ -11,6 +11,7 @@ export interface CodeContext {
     context: string[];
     reducers: string[];
     locals: string[];
+    reduxContext: string[];
   };
   insertPos: vscode.Position;
   hookBodyEndPos?: vscode.Position;

@@ -14,6 +14,7 @@ type VariableBuckets = {
   context: string[];
   reducers: string[];
   locals: string[];
+  reduxContext: string[];
 };
 
 export function parseCodeContextAtCursor(code: string, cursor: vscode.Position, doc: vscode.TextDocument): CodeContext | null {
@@ -34,7 +35,7 @@ export function parseFileForFunctions(code: string, doc: vscode.TextDocument): C
 
 function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?: vscode.Position): CodeContext | CodeContext[] | null {
   const config = getConfiguration();
-  const { enableClassMethodLogging, enableHookLogging } = config;
+  const { enableClassMethodLogging, enableHookLogging, enableReduxContextLogging } = config;
 
   const ast = parse(code, {
     sourceType: 'module',
@@ -84,6 +85,7 @@ function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?:
           context: [],
           reducers: [],
           locals: [],
+          reduxContext: [],
         };
 
         let args: string[] = [];
@@ -161,6 +163,19 @@ function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?:
                     case 'useReducer':
                       if (names.length >= 2) {
                         newContext.variables.reducers.push(`${names[0]}: ${names[0]}, ${names[1]}: ${names[1]}`);
+                      }
+                      break;
+                    case 'useSelector':
+                    case 'useContext':
+                      if (config.enableReduxContextLogging && init.arguments.length > 0) {
+                        const arg = init.arguments[0];
+                        if (t.isIdentifier(arg)) {
+                          newContext.variables.reduxContext.push(arg.name);
+                        } else if (t.isMemberExpression(arg) && t.isIdentifier(arg.property) && arg.loc) {
+                          newContext.variables.reduxContext.push(doc.getText(new vscode.Range(new vscode.Position(arg.loc.start.line - 1, arg.loc.start.column), new vscode.Position(arg.loc.end.line - 1, arg.loc.end.column))));
+                        } else if (t.isCallExpression(arg) && t.isIdentifier(arg.callee) && arg.loc) {
+                          newContext.variables.reduxContext.push(doc.getText(new vscode.Range(new vscode.Position(arg.loc.start.line - 1, arg.loc.start.column), new vscode.Position(arg.loc.end.line - 1, arg.loc.end.column))));
+                        }
                       }
                       break;
                     case 'useCallback':

@@ -68,6 +68,8 @@ export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedI
           parts.push(`refs: { ${selectedMap[typeKey].map((s) => `${s}: ${s}.current`).join(', ')} }`);
         } else if (typeKey === 'reducers') {
           parts.push(`reducer: { ${selectedMap[typeKey].join(', ')} }`);
+        } else if (typeKey === 'reduxContext') {
+          parts.push(`reduxContext: { ${selectedMap[typeKey].join(', ')} }`);
         } else if (typeKey === 'args') {
           parts.push(`args: { ${selectedMap[typeKey].join(', ')} }`);
         } else {
