@@ -62,6 +62,19 @@ export async function insertLogCommand(): Promise<void> {
   });
 }
 
+function isDuplicateLog(doc: vscode.TextDocument, insertPos: vscode.Position, logLine: string): boolean {
+  const startLine = Math.max(0, insertPos.line - 2);
+  const endLine = Math.min(doc.lineCount - 1, insertPos.line + 2);
+
+  for (let i = startLine; i <= endLine; i++) {
+    const lineText = doc.lineAt(i).text.trim();
+    if (lineText === logLine.trim()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export async function wrapInConsoleLogCommand(): Promise<void> {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
