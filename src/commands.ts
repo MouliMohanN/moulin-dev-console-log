@@ -86,7 +86,10 @@ async function isFileIgnored(uri: vscode.Uri): Promise<boolean> {
     const ignoreFilePath = vscode.Uri.joinPath(workspaceFolder.uri, ignoreFile);
     try {
       const content = await vscode.workspace.fs.readFile(ignoreFilePath);
-      const ignorePatterns = Buffer.from(content).toString('utf8').split(/\n/).filter(line => line.trim() !== '' && !line.startsWith('#'));
+      const ignorePatterns = Buffer.from(content)
+        .toString('utf8')
+        .split(/\n/)
+        .filter((line) => line.trim() !== '' && !line.startsWith('#'));
 
       for (const pattern of ignorePatterns) {
         // Very basic glob matching: check if the pattern is a direct match or a directory prefix

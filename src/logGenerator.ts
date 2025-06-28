@@ -1,5 +1,4 @@
 import { getConfiguration } from './config';
-import { logger } from './logger';
 import { CodeContext } from './types';
 
 function buildLogObject(context: CodeContext, logItemsConfig: string[]): string {

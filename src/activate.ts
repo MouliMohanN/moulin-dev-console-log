@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { insertLogCommand, wrapInConsoleLogCommand, cleanLogsCommand, insertLogForFileCommand } from './commands';
+import { cleanLogsCommand, insertLogCommand, insertLogForFileCommand, wrapInConsoleLogCommand } from './commands';
 import { initLogger, logger } from './logger';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -31,17 +31,21 @@ export function activate(context: vscode.ExtensionContext) {
     wrapInConsoleLogCommand,
   );
 
-  const cleanLogsDisposable = vscode.commands.registerCommand(
-    'contextualConsoleLog.cleanLogs',
-    cleanLogsCommand,
-  );
+  const cleanLogsDisposable = vscode.commands.registerCommand('contextualConsoleLog.cleanLogs', cleanLogsCommand);
 
   const insertLogForFileDisposable = vscode.commands.registerCommand(
     'contextualConsoleLog.insertLogForFile',
     insertLogForFileCommand,
   );
 
-  context.subscriptions.push(insertLogDisposable, wrapInConsoleLogDisposable, cleanLogsDisposable, insertLogForFileDisposable, statusBarItem, toggleLoggingDisposable);
+  context.subscriptions.push(
+    insertLogDisposable,
+    wrapInConsoleLogDisposable,
+    cleanLogsDisposable,
+    insertLogForFileDisposable,
+    statusBarItem,
+    toggleLoggingDisposable,
+  );
 }
 
 export function deactivate() {

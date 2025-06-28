@@ -1,11 +1,11 @@
 import { parse } from '@babel/parser';
-import traverse, { NodePath } from '@babel/traverse';
+import traverse from '@babel/traverse';
 import * as t from '@babel/types';
 import * as vscode from 'vscode';
 
+import { getConfiguration } from './config';
 import { CodeContext } from './types';
 import { findReturnInsertPosition, positionIn } from './utils';
-import { getConfiguration } from './config';
 
 type VariableBuckets = {
   props: string[];
@@ -17,7 +17,11 @@ type VariableBuckets = {
   reduxContext: string[];
 };
 
-export function parseCodeContextAtCursor(code: string, cursor: vscode.Position, doc: vscode.TextDocument): CodeContext | null {
+export function parseCodeContextAtCursor(
+  code: string,
+  cursor: vscode.Position,
+  doc: vscode.TextDocument,
+): CodeContext | null {
   const result = parseAndExtractContext(code, doc, cursor);
   if (Array.isArray(result) || result === null) {
     return null;
@@ -33,7 +37,11 @@ export function parseFileForFunctions(code: string, doc: vscode.TextDocument): C
   return result;
 }
 
-function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?: vscode.Position): CodeContext | CodeContext[] | null {
+function parseAndExtractContext(
+  code: string,
+  doc: vscode.TextDocument,
+  cursor?: vscode.Position,
+): CodeContext | CodeContext[] | null {
   const config = getConfiguration();
   const { enableClassMethodLogging, enableHookLogging, enableReduxContextLogging } = config;
 
@@ -54,10 +62,11 @@ function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?:
         return;
       }
 
-      const isFunctionNode = t.isFunctionDeclaration(node) ||
-                           t.isArrowFunctionExpression(node) ||
-                           t.isFunctionExpression(node) ||
-                           t.isClassMethod(node);
+      const isFunctionNode =
+        t.isFunctionDeclaration(node) ||
+        t.isArrowFunctionExpression(node) ||
+        t.isFunctionExpression(node) ||
+        t.isClassMethod(node);
 
       if (isFunctionNode) {
         const name =
@@ -109,26 +118,33 @@ function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?:
           variables: {
             ...variables,
           },
-          parentContext: functionContextStack.length > 0 ? functionContextStack[functionContextStack.length - 1] : undefined,
+          parentContext:
+            functionContextStack.length > 0 ? functionContextStack[functionContextStack.length - 1] : undefined,
         };
 
         // Class Method Logging
         if (enableClassMethodLogging && t.isClassMethod(node)) {
-          traverse(node, {
-            MemberExpression(memberPath) {
-              if (t.isThisExpression(memberPath.node.object) && t.isIdentifier(memberPath.node.property)) {
-                if (memberPath.node.property.name === 'props') {
-                  if (!newContext.variables.props.includes('this.props')) {
-                    newContext.variables.props.push('this.props');
-                  }
-                } else if (memberPath.node.property.name === 'state') {
-                  if (!newContext.variables.state.includes('this.state')) {
-                    newContext.variables.state.push('this.state');
+          traverse(
+            node,
+            {
+              MemberExpression(memberPath) {
+                if (t.isThisExpression(memberPath.node.object) && t.isIdentifier(memberPath.node.property)) {
+                  if (memberPath.node.property.name === 'props') {
+                    if (!newContext.variables.props.includes('this.props')) {
+                      newContext.variables.props.push('this.props');
+                    }
+                  } else if (memberPath.node.property.name === 'state') {
+                    if (!newContext.variables.state.includes('this.state')) {
+                      newContext.variables.state.push('this.state');
+                    }
                   }
                 }
-              }
+              },
             },
-          }, path.scope, path.state, path.parentPath || undefined);
+            path.scope,
+            path.state,
+            path.parentPath || undefined,
+          );
         }
 
         // Collect local variables directly from the function body
@@ -172,9 +188,23 @@ function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?:
                         if (t.isIdentifier(arg)) {
                           newContext.variables.reduxContext.push(arg.name);
                         } else if (t.isMemberExpression(arg) && t.isIdentifier(arg.property) && arg.loc) {
-                          newContext.variables.reduxContext.push(doc.getText(new vscode.Range(new vscode.Position(arg.loc.start.line - 1, arg.loc.start.column), new vscode.Position(arg.loc.end.line - 1, arg.loc.end.column))));
+                          newContext.variables.reduxContext.push(
+                            doc.getText(
+                              new vscode.Range(
+                                new vscode.Position(arg.loc.start.line - 1, arg.loc.start.column),
+                                new vscode.Position(arg.loc.end.line - 1, arg.loc.end.column),
+                              ),
+                            ),
+                          );
                         } else if (t.isCallExpression(arg) && t.isIdentifier(arg.callee) && arg.loc) {
-                          newContext.variables.reduxContext.push(doc.getText(new vscode.Range(new vscode.Position(arg.loc.start.line - 1, arg.loc.start.column), new vscode.Position(arg.loc.end.line - 1, arg.loc.end.column))));
+                          newContext.variables.reduxContext.push(
+                            doc.getText(
+                              new vscode.Range(
+                                new vscode.Position(arg.loc.start.line - 1, arg.loc.start.column),
+                                new vscode.Position(arg.loc.end.line - 1, arg.loc.end.column),
+                              ),
+                            ),
+                          );
                         }
                       }
                       break;
@@ -187,7 +217,10 @@ function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?:
                         const callbackArg = init.arguments[0];
                         if (t.isArrowFunctionExpression(callbackArg) || t.isFunctionExpression(callbackArg)) {
                           if (callbackArg.body.loc) {
-                            newContext.hookBodyEndPos = new vscode.Position(callbackArg.body.loc.end.line - 1, callbackArg.body.loc.end.column);
+                            newContext.hookBodyEndPos = new vscode.Position(
+                              callbackArg.body.loc.end.line - 1,
+                              callbackArg.body.loc.end.column,
+                            );
                           }
                         }
                         if (init.arguments.length > 1 && t.isArrayExpression(init.arguments[1])) {
@@ -228,10 +261,11 @@ function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?:
     },
     exit(path) {
       const node = path.node;
-      const isFunctionNode = t.isFunctionDeclaration(node) ||
-                           t.isArrowFunctionExpression(node) ||
-                           t.isFunctionExpression(node) ||
-                           t.isClassMethod(node);
+      const isFunctionNode =
+        t.isFunctionDeclaration(node) ||
+        t.isArrowFunctionExpression(node) ||
+        t.isFunctionExpression(node) ||
+        t.isClassMethod(node);
       if (isFunctionNode) {
         functionContextStack.pop();
       }
@@ -274,7 +308,7 @@ function filterUnusedVariables(variables: VariableBuckets, scope: any) {
 function filterSensitiveKeys(variables: VariableBuckets, sensitiveKeys: string[]) {
   for (const key in variables) {
     const category = key as keyof VariableBuckets;
-    variables[category] = variables[category].filter(name => !sensitiveKeys.includes(name));
+    variables[category] = variables[category].filter((name) => !sensitiveKeys.includes(name));
   }
 }
 

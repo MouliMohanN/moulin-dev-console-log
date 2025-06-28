@@ -129,7 +129,12 @@
         },
         "contextualConsoleLog.sensitiveKeys": {
           "type": "array",
-          "default": ["password", "token", "secret", "api_key"],
+          "default": [
+            "password",
+            "token",
+            "secret",
+            "api_key"
+          ],
           "items": {
             "type": "string"
           },
