@@ -89,12 +89,12 @@
         },
         "contextualConsoleLog.enableClassMethodLogging": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Enable logging for class methods (e.g., 'this.props', 'this.state')."
         },
         "contextualConsoleLog.enableHookLogging": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Enable logging for variables within React hooks (useEffect, useMemo, useCallback)."
         },
         "contextualConsoleLog.logTag": {
@@ -116,6 +116,11 @@
           "type": "boolean",
           "default": true,
           "description": "Enable anonymous telemetry to help improve the extension."
+        },
+        "contextualConsoleLog.enableReduxContextLogging": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable logging for Redux/Context stores (e.g., useSelector, useContext)."
         }
       }
     },

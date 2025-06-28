@@ -12,6 +12,7 @@ export interface ExtensionConfig {
   wrapInDevCheck: boolean;
   showPreview: boolean;
   enableTelemetry: boolean;
+  enableReduxContextLogging: boolean;
 }
 
 export function getConfiguration(): ExtensionConfig {
@@ -22,12 +23,13 @@ export function getConfiguration(): ExtensionConfig {
     logItems: config.get<string[]>('logItems', ['props', 'state', 'refs', 'context', 'reducers', 'locals']),
     addDebugger: config.get<boolean>('addDebugger', false),
     logFunction: config.get<string>('logFunction', 'console'),
-    enableClassMethodLogging: config.get<boolean>('enableClassMethodLogging', false),
-    enableHookLogging: config.get<boolean>('enableHookLogging', false),
+    enableClassMethodLogging: config.get<boolean>('enableClassMethodLogging', true),
+    enableHookLogging: config.get<boolean>('enableHookLogging', true),
     logTag: config.get<string>('logTag', '// @contextual-log'),
     wrapInDevCheck: config.get<boolean>('wrapInDevCheck', false),
     showPreview: config.get<boolean>('showPreview', false),
     enableTelemetry: config.get<boolean>('enableTelemetry', true),
+    enableReduxContextLogging: config.get<boolean>('enableReduxContextLogging', false),
   };
 }
 
