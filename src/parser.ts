@@ -43,6 +43,7 @@ function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?:
 
   const allFunctionContexts: CodeContext[] = [];
   let cursorFunctionContext: CodeContext | null = null;
+  const functionContextStack: CodeContext[] = [];
 
   traverse(ast, {
     enter(path) {
@@ -108,6 +109,7 @@ function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?:
           variables: {
             ...variables,
           },
+          parentContext: functionContextStack.length > 0 ? functionContextStack[functionContextStack.length - 1] : undefined,
         };
 
         // Class Method Logging
@@ -190,21 +192,19 @@ function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?:
           cursorFunctionContext = newContext;
         }
         allFunctionContexts.push(newContext);
+        functionContextStack.push(newContext);
       }
     },
-  });
-
-  // Link parent contexts
-  allFunctionContexts.forEach((ctx, index) => {
-    if (index > 0) {
-      for (let i = index - 1; i >= 0; i--) {
-        const parentCtx = allFunctionContexts[i];
-        if (parentCtx.insertPos.line < ctx.insertPos.line) {
-          ctx.parentContext = parentCtx;
-          break;
-        }
+    exit(path) {
+      const node = path.node;
+      const isFunctionNode = t.isFunctionDeclaration(node) ||
+                           t.isArrowFunctionExpression(node) ||
+                           t.isFunctionExpression(node) ||
+                           t.isClassMethod(node);
+      if (isFunctionNode) {
+        functionContextStack.pop();
       }
-    }
+    },
   });
 
   if (cursor) {
