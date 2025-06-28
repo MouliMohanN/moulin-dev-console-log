@@ -26,15 +26,34 @@ export function activate(context: vscode.ExtensionContext) {
       return;
     }
 
-    const allVariables = [
-      ...firstContextInfo.variables.props.map((p) => ({ label: `props: ${p}`, detail: 'Prop' })),
-      ...firstContextInfo.variables.state.map((s) => ({ label: `state: ${s}`, detail: 'State' })),
-      ...firstContextInfo.variables.refs.map((r) => ({ label: `refs: ${r}`, detail: 'Ref' })),
-      ...firstContextInfo.variables.context.map((c) => ({ label: `context: ${c}`, detail: 'Context' })),
-      ...firstContextInfo.variables.reducers.map((r) => ({ label: `reducers: ${r}`, detail: 'Reducer' })),
-      ...firstContextInfo.variables.locals.map((l) => ({ label: `locals: ${l}`, detail: 'Local' })),
-      ...(firstContextInfo.type === 'function' ? firstContextInfo.args.map((a) => ({ label: `args: ${a}`, detail: 'Argument' })) : []),
-    ];
+    const allVariables: vscode.QuickPickItem[] = [];
+
+    let currentContext = firstContextInfo;
+    let depth = 0;
+
+    while (currentContext) {
+      const scopePrefix = depth === 0 ? '' : `Parent (${currentContext.name}): `;
+
+      const addVariablesToQuickPick = (variableArray: string[], typeLabel: string) => {
+        variableArray.forEach((name: string) => {
+          allVariables.push({ label: `${scopePrefix}${typeLabel}: ${name}`, detail: typeLabel });
+        });
+      };
+
+      if (currentContext.type === 'function') {
+        addVariablesToQuickPick(currentContext.args, 'args');
+      }
+
+      addVariablesToQuickPick(currentContext.variables.props, 'props');
+      addVariablesToQuickPick(currentContext.variables.state, 'state');
+      addVariablesToQuickPick(currentContext.variables.refs, 'refs');
+      addVariablesToQuickPick(currentContext.variables.context, 'context');
+      addVariablesToQuickPick(currentContext.variables.reducers, 'reducers');
+      addVariablesToQuickPick(currentContext.variables.locals, 'locals');
+
+      currentContext = currentContext.parentContext as any; // Cast to any to avoid type issues with undefined
+      depth++;
+    }
 
     const selectedItems = await vscode.window.showQuickPick(allVariables, {
       canPickMany: true,
@@ -56,9 +75,13 @@ export function activate(context: vscode.ExtensionContext) {
 
         let logLine: string;
         if (selectedItems && selectedItems.length > 0) {
+          // When specific items are selected, generate log only for those.
+          // The logGenerator will handle the structure based on the labels.
           const selectedLabels = selectedItems.map((item) => item.label);
           logLine = generateConsoleLog(contextInfo, fileName, selectedLabels);
         } else {
+          // If no items are selected, log all variables from the current and parent contexts
+          // as per the configuration.
           logLine = generateConsoleLog(contextInfo, fileName);
         }
         edits.push({ insertPos: contextInfo.insertPos, logLine });
