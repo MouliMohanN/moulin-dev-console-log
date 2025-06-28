@@ -198,6 +198,9 @@ function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?:
         // Determine the final insert position
         newContext.insertPos = newContext.hookBodyEndPos || findReturnInsertPosition(node, doc);
 
+        // Filter out unused variables
+        filterUnusedVariables(newContext.variables, path.scope);
+
         if (cursor && positionIn(node.loc, cursor, doc)) {
           cursorFunctionContext = newContext;
         }
@@ -217,12 +220,36 @@ function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?:
     },
   });
 
+  // Link parent contexts
+  allFunctionContexts.forEach((ctx, index) => {
+    if (index > 0) {
+      for (let i = index - 1; i >= 0; i--) {
+        const parentCtx = allFunctionContexts[i];
+        if (parentCtx.insertPos.line < ctx.insertPos.line) {
+          ctx.parentContext = parentCtx;
+          break;
+        }
+      }
+    }
+  });
+
   if (cursor) {
     return cursorFunctionContext;
   } else if (allFunctionContexts.length > 0) {
     return allFunctionContexts;
   } else {
     return null;
+  }
+}
+
+function filterUnusedVariables(variables: VariableBuckets, scope: any) {
+  for (const key in variables) {
+    const category = key as keyof VariableBuckets;
+    variables[category] = variables[category].filter((name: string) => {
+      const binding = scope.getBinding(name);
+      // A binding exists and has references, or it's a global/implicit variable (no binding)
+      return !binding || binding.referenced;
+    });
   }
 }
 
