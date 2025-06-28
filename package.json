@@ -89,14 +89,25 @@
           "type": "boolean",
           "default": false,
           "description": "Enable logging for variables within React hooks (useEffect, useMemo, useCallback)."
+        },
+        "contextualConsoleLog.logTag": {
+          "type": "string",
+          "default": "// @contextual-log",
+          "description": "A unique tag to identify logs inserted by the extension for easier cleanup."
+        },
+        "contextualConsoleLog.wrapInDevCheck": {
+          "type": "boolean",
+          "default": false,
+          "description": "Wrap inserted logs in an environment check (e.g., `if (process.env.NODE_ENV !== 'production')`)."
         }
       }
-    }
+    },
+    "activationEvents": [
+      "onCommand:contextualConsoleLog.insertLog",
+      "onCommand:contextualConsoleLog.wrapInConsoleLog",
+      "onCommand:contextualConsoleLog.cleanLogs"
+    ]
   },
-  "activationEvents": [
-    "onCommand:contextualConsoleLog.insertLog",
-    "onCommand:contextualConsoleLog.wrapInConsoleLog"
-  ],
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "npm run check-types && npm run lint && node esbuild.js",

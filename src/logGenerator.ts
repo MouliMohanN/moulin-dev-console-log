@@ -33,7 +33,7 @@ function buildLogObject(context: CodeContext, logItemsConfig: string[]): string 
 
 export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedItems?: string[]): string {
   const config = getConfiguration();
-  const { logTemplate, logLevel, addDebugger, logItems, logFunction } = config;
+  const { logTemplate, logLevel, addDebugger, logItems, logFunction, logTag, wrapInDevCheck } = config;
 
   const prefix = logTemplate.replace('${fileName}', fileName).replace('${functionName}', ctx.name);
 
@@ -81,6 +81,14 @@ export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedI
   }
 
   let logLine = `${logFunction}.${logLevel}('${prefix}', ${logObject});`;
+
+  if (wrapInDevCheck) {
+    logLine = `if (process.env.NODE_ENV !== 'production') {\n  ${logLine}\n}`; // Indent the log line
+  }
+
+  if (logTag) {
+    logLine = `${logLine} ${logTag}`;
+  }
 
   if (addDebugger) {
     logLine = `debugger;\n${logLine}`;

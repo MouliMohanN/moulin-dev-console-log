@@ -8,6 +8,8 @@ export interface ExtensionConfig {
   logFunction: string;
   enableClassMethodLogging: boolean;
   enableHookLogging: boolean;
+  logTag: string;
+  wrapInDevCheck: boolean;
 }
 
 export function getConfiguration(): ExtensionConfig {
@@ -20,6 +22,8 @@ export function getConfiguration(): ExtensionConfig {
     logFunction: config.get<string>('logFunction', 'console'),
     enableClassMethodLogging: config.get<boolean>('enableClassMethodLogging', false),
     enableHookLogging: config.get<boolean>('enableHookLogging', false),
+    logTag: config.get<string>('logTag', '// @contextual-log'),
+    wrapInDevCheck: config.get<boolean>('wrapInDevCheck', false),
   };
 }
 

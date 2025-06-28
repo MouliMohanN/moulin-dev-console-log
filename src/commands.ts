@@ -1,18 +1,23 @@
 import * as vscode from 'vscode';
+import { getConfiguration } from './config';
 import { generateConsoleLog } from './logGenerator';
 import { logger } from './logger';
 import { parseCodeContext } from './parser';
 import { showVariableQuickPick } from './quickPick';
+
 export async function insertLogCommand(): Promise<void> {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
     return;
   }
+
   const doc = editor.document;
   const code = doc.getText();
   const fileName = vscode.workspace.asRelativePath(doc.uri);
+
   const firstCursor = editor.selections[0].active;
   const firstContextInfo = parseCodeContext(code, firstCursor, doc);
+
   if (!firstContextInfo) {
     logger.warn('No valid context found for logging at the first cursor.', {
       doc,
@@ -22,16 +27,21 @@ export async function insertLogCommand(): Promise<void> {
     });
     return;
   }
+
   const selectedItems = await showVariableQuickPick(firstContextInfo);
+
   const edits: { insertPos: vscode.Position; logLine: string }[] = [];
+
   for (const selection of editor.selections) {
     const cursor = selection.active;
     try {
       const contextInfo = parseCodeContext(code, cursor, doc);
+
       if (!contextInfo) {
         logger.warn('No valid context found for logging.', { doc, cursor, code, fileName });
         continue;
       }
+
       let logLine: string;
       if (selectedItems && selectedItems.length > 0) {
         const selectedLabels = selectedItems.map((item) => item.label);
@@ -44,17 +54,20 @@ export async function insertLogCommand(): Promise<void> {
       logger.error('Console log generation failed: ' + (err as Error).message);
     }
   }
+
   await editor.edit((editBuilder) => {
     edits.forEach((edit) => {
       editBuilder.insert(edit.insertPos, edit.logLine + '\n');
     });
   });
 }
+
 export async function wrapInConsoleLogCommand(): Promise<void> {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
     return;
   }
+
   await editor.edit((editBuilder) => {
     for (const selection of editor.selections) {
       const selectedText = editor.document.getText(selection);
@@ -64,4 +77,34 @@ export async function wrapInConsoleLogCommand(): Promise<void> {
       }
     }
   });
+}
+
+export async function cleanLogsCommand(): Promise<void> {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    return;
+  }
+
+  const doc = editor.document;
+  const config = getConfiguration();
+  const logTag = config.logTag;
+
+  const linesToDelete: vscode.Range[] = [];
+  for (let i = 0; i < doc.lineCount; i++) {
+    const line = doc.lineAt(i);
+    if (line.text.includes(logTag)) {
+      linesToDelete.push(line.rangeIncludingLineBreak);
+    }
+  }
+
+  if (linesToDelete.length > 0) {
+    await editor.edit((editBuilder) => {
+      linesToDelete.forEach((range) => {
+        editBuilder.delete(range);
+      });
+    });
+    vscode.window.showInformationMessage(`Cleaned ${linesToDelete.length} contextual logs.`);
+  } else {
+    vscode.window.showInformationMessage('No contextual logs found to clean.');
+  }
 }
