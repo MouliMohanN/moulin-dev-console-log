@@ -10,6 +10,7 @@ export interface ExtensionConfig {
   enableHookLogging: boolean;
   logTag: string;
   wrapInDevCheck: boolean;
+  showPreview: boolean;
 }
 
 export function getConfiguration(): ExtensionConfig {
@@ -24,6 +25,7 @@ export function getConfiguration(): ExtensionConfig {
     enableHookLogging: config.get<boolean>('enableHookLogging', false),
     logTag: config.get<string>('logTag', '// @contextual-log'),
     wrapInDevCheck: config.get<boolean>('wrapInDevCheck', false),
+    showPreview: config.get<boolean>('showPreview', false),
   };
 }
 

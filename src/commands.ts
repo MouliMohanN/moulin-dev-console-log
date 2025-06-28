@@ -49,17 +49,73 @@ export async function insertLogCommand(): Promise<void> {
       } else {
         logLine = generateConsoleLog(contextInfo, fileName);
       }
-      edits.push({ insertPos: contextInfo.insertPos, logLine });
+      if (!isDuplicateLog(doc, contextInfo.insertPos, logLine)) {
+        edits.push({ insertPos: contextInfo.insertPos, logLine });
+      } else {
+        logger.warn('Skipping duplicate log insertion.', { logLine });
+      }
     } catch (err) {
       logger.error('Console log generation failed: ' + (err as Error).message);
     }
   }
 
-  await editor.edit((editBuilder) => {
-    edits.forEach((edit) => {
-      editBuilder.insert(edit.insertPos, edit.logLine + '\n');
-    });
+  const config = getConfiguration();
+  await applyEditsWithPreview(editor, edits, config.showPreview);
+}
+
+async function applyEditsWithPreview(
+  editor: vscode.TextEditor,
+  edits: { insertPos: vscode.Position; logLine: string }[],
+  showPreview: boolean,
+): Promise<void> {
+  if (edits.length === 0) {
+    return;
+  }
+
+  const workspaceEdit = new vscode.WorkspaceEdit();
+  edits.forEach((edit) => {
+    workspaceEdit.insert(editor.document.uri, edit.insertPos, edit.logLine + '\n');
   });
+
+  if (showPreview) {
+    const originalContent = editor.document.getText();
+    const tempDocUri = vscode.Uri.parse('untitled:' + editor.document.fileName + '.preview');
+    const tempDoc = await vscode.workspace.openTextDocument(tempDocUri);
+    const tempEditor = await vscode.window.showTextDocument(tempDoc, { preview: true });
+
+    await tempEditor.edit((editBuilder) => {
+      edits.forEach((edit) => {
+        editBuilder.insert(edit.insertPos, edit.logLine + '\n');
+      });
+    });
+
+    await vscode.commands.executeCommand(
+      'vscode.diff',
+      editor.document.uri,
+      tempDocUri,
+      `Preview: ${editor.document.fileName}`,
+    );
+
+    const confirmation = await vscode.window.showInformationMessage(
+      'Apply these changes?',
+      { modal: true },
+      'Yes',
+      'No',
+    );
+
+    if (confirmation === 'Yes') {
+      await vscode.workspace.applyEdit(workspaceEdit);
+    } else {
+      vscode.window.showInformationMessage('Log insertion cancelled.');
+    }
+    await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+  } else {
+    await editor.edit((editBuilder) => {
+      edits.forEach((edit) => {
+        editBuilder.insert(edit.insertPos, edit.logLine + '\n');
+      });
+    });
+  }
 }
 
 function isDuplicateLog(doc: vscode.TextDocument, insertPos: vscode.Position, logLine: string): boolean {

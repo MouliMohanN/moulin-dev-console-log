@@ -98,6 +98,11 @@
           "type": "boolean",
           "default": false,
           "description": "Wrap inserted logs in an environment check (e.g., `if (process.env.NODE_ENV !== 'production')`)."
+        },
+        "contextualConsoleLog.showPreview": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show a preview of the log insertion before applying changes."
         }
       }
     },
