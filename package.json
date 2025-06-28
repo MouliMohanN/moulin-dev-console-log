@@ -104,7 +104,8 @@
     "activationEvents": [
       "onCommand:contextualConsoleLog.insertLog",
       "onCommand:contextualConsoleLog.wrapInConsoleLog",
-      "onCommand:contextualConsoleLog.cleanLogs"
+      "onCommand:contextualConsoleLog.cleanLogs",
+      "onCommand:contextualConsoleLog.insertLogForFile"
     ]
   },
   "scripts": {

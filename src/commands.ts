@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { getConfiguration } from './config';
 import { generateConsoleLog } from './logGenerator';
 import { logger } from './logger';
-import { parseCodeContext } from './parser';
+import { parseCodeContextAtCursor, parseFileForFunctions } from './parser';
 import { showVariableQuickPick } from './quickPick';
 
 export async function insertLogCommand(): Promise<void> {
@@ -16,7 +16,7 @@ export async function insertLogCommand(): Promise<void> {
   const fileName = vscode.workspace.asRelativePath(doc.uri);
 
   const firstCursor = editor.selections[0].active;
-  const firstContextInfo = parseCodeContext(code, firstCursor, doc);
+  const firstContextInfo = parseCodeContextAtCursor(code, firstCursor, doc);
 
   if (!firstContextInfo) {
     logger.warn('No valid context found for logging at the first cursor.', {
@@ -35,7 +35,7 @@ export async function insertLogCommand(): Promise<void> {
   for (const selection of editor.selections) {
     const cursor = selection.active;
     try {
-      const contextInfo = parseCodeContext(code, cursor, doc);
+      const contextInfo = parseCodeContextAtCursor(code, cursor, doc);
 
       if (!contextInfo) {
         logger.warn('No valid context found for logging.', { doc, cursor, code, fileName });
@@ -106,5 +106,45 @@ export async function cleanLogsCommand(): Promise<void> {
     vscode.window.showInformationMessage(`Cleaned ${linesToDelete.length} contextual logs.`);
   } else {
     vscode.window.showInformationMessage('No contextual logs found to clean.');
+  }
+}
+
+export async function insertLogForFileCommand(): Promise<void> {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    return;
+  }
+
+  const doc = editor.document;
+  const code = doc.getText();
+  const fileName = vscode.workspace.asRelativePath(doc.uri);
+
+  const functionContexts = parseFileForFunctions(code, doc);
+
+  if (functionContexts.length === 0) {
+    vscode.window.showInformationMessage('No functions or components found in the file to log.');
+    return;
+  }
+
+  const edits: { insertPos: vscode.Position; logLine: string }[] = [];
+
+  for (const context of functionContexts) {
+    try {
+      const logLine = generateConsoleLog(context, fileName);
+      edits.push({ insertPos: context.insertPos, logLine });
+    } catch (err) {
+      logger.error(`Console log generation failed for function ${context.name}: ` + (err as Error).message);
+    }
+  }
+
+  if (edits.length > 0) {
+    await editor.edit((editBuilder) => {
+      edits.forEach((edit) => {
+        editBuilder.insert(edit.insertPos, edit.logLine + '\n');
+      });
+    });
+    vscode.window.showInformationMessage(`Inserted logs for ${edits.length} functions/components.`);
+  } else {
+    vscode.window.showInformationMessage('No logs were generated for the functions/components in the file.');
   }
 }

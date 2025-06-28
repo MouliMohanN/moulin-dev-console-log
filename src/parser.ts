@@ -16,7 +16,23 @@ type VariableBuckets = {
   locals: string[];
 };
 
-export function parseCodeContext(code: string, cursor: vscode.Position, doc: vscode.TextDocument): CodeContext | null {
+export function parseCodeContextAtCursor(code: string, cursor: vscode.Position, doc: vscode.TextDocument): CodeContext | null {
+  const result = parseAndExtractContext(code, doc, cursor);
+  if (Array.isArray(result) || result === null) {
+    return null;
+  }
+  return result;
+}
+
+export function parseFileForFunctions(code: string, doc: vscode.TextDocument): CodeContext[] {
+  const result = parseAndExtractContext(code, doc);
+  if (result === null || !Array.isArray(result)) {
+    return [];
+  }
+  return result;
+}
+
+function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?: vscode.Position): CodeContext | CodeContext[] | null {
   const config = getConfiguration();
   const { enableClassMethodLogging, enableHookLogging } = config;
 
@@ -25,9 +41,8 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
     plugins: ['jsx', 'typescript'],
   });
 
-  const functionPaths: NodePath<
-    t.FunctionDeclaration | t.ArrowFunctionExpression | t.FunctionExpression | t.ClassMethod
-  >[] = [];
+  const allFunctionContexts: CodeContext[] = [];
+  let cursorFunctionContext: CodeContext | null = null;
 
   traverse(ast, {
     enter(path) {
@@ -37,175 +52,168 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
         return;
       }
 
-      if (
-        positionIn(node.loc, cursor, doc) &&
-        (t.isFunctionDeclaration(node) ||
-          t.isArrowFunctionExpression(node) ||
-          t.isFunctionExpression(node) ||
-          t.isClassMethod(node))
-      ) {
-        functionPaths.push(
-          path as NodePath<t.FunctionDeclaration | t.ArrowFunctionExpression | t.FunctionExpression | t.ClassMethod>,
-        );
+      const isFunctionNode = t.isFunctionDeclaration(node) ||
+                           t.isArrowFunctionExpression(node) ||
+                           t.isFunctionExpression(node) ||
+                           t.isClassMethod(node);
+
+      if (isFunctionNode) {
+        const name =
+          (node as any).id?.name ||
+          ((node as any).key?.name as string) ||
+          (path.parent.type === 'VariableDeclarator' && (path.parent as any).id?.name) ||
+          'anonymous';
+
+        let isComponent = false;
+        path.traverse({
+          JSXElement() {
+            isComponent = true;
+            path.stop();
+          },
+          JSXFragment() {
+            isComponent = true;
+            path.stop();
+          },
+        });
+
+        const variables: VariableBuckets = {
+          props: [],
+          state: [],
+          refs: [],
+          context: [],
+          reducers: [],
+          locals: [],
+        };
+
+        let args: string[] = [];
+        if (node.params) {
+          node.params.forEach((param: t.LVal) => {
+            if (t.isObjectPattern(param) || t.isIdentifier(param) || t.isArrayPattern(param)) {
+              args.push(...extractVariableNames(param));
+            }
+          });
+        }
+
+        if (isComponent) {
+          variables.props = args;
+        }
+
+        const insertPos = findReturnInsertPosition(node, doc);
+
+        const newContext: CodeContext = {
+          type: isComponent ? 'react' : 'function',
+          name,
+          args,
+          insertPos,
+          variables: {
+            ...variables,
+          },
+        };
+
+        // Class Method Logging
+        if (enableClassMethodLogging && t.isClassMethod(node)) {
+          traverse(node, {
+            MemberExpression(memberPath) {
+              if (t.isThisExpression(memberPath.node.object) && t.isIdentifier(memberPath.node.property)) {
+                if (memberPath.node.property.name === 'props') {
+                  if (!newContext.variables.props.includes('this.props')) {
+                    newContext.variables.props.push('this.props');
+                  }
+                } else if (memberPath.node.property.name === 'state') {
+                  if (!newContext.variables.state.includes('this.state')) {
+                    newContext.variables.state.push('this.state');
+                  }
+                }
+              }
+            },
+          }, path.scope, path.state, path.parentPath || undefined);
+        }
+
+        // Collect local variables directly from the function body
+        if (t.isBlockStatement(node.body)) {
+          node.body.body.forEach((bodyNode) => {
+            if (t.isVariableDeclaration(bodyNode)) {
+              bodyNode.declarations.forEach((declaration) => {
+                const id = declaration.id;
+                const init = declaration.init;
+
+                if (!t.isIdentifier(id) && !t.isArrayPattern(id) && !t.isObjectPattern(id)) {
+                  return;
+                }
+
+                const names = extractVariableNames(id);
+
+                if (t.isCallExpression(init)) {
+                  const callee = (init.callee as any).name || (init.callee as any).property?.name;
+
+                  switch (callee) {
+                    case 'useState':
+                      if (t.isArrayPattern(id) && id.elements[0] && t.isIdentifier(id.elements[0])) {
+                        newContext.variables.state.push(id.elements[0].name);
+                      }
+                      break;
+                    case 'useRef':
+                      names.forEach((n) => newContext.variables.refs.push(n));
+                      break;
+                    case 'useContext':
+                      names.forEach((n) => newContext.variables.context.push(n));
+                      break;
+                    case 'useReducer':
+                      if (names.length >= 2) {
+                        newContext.variables.reducers.push(`${names[0]}: ${names[0]}, ${names[1]}: ${names[1]}`);
+                      }
+                      break;
+                    case 'useCallback':
+                      break;
+                    case 'useEffect':
+                    case 'useMemo':
+                      if (enableHookLogging && init.arguments.length > 1 && t.isArrayExpression(init.arguments[1])) {
+                        init.arguments[1].elements.forEach((element) => {
+                          if (t.isIdentifier(element)) {
+                            newContext.variables.locals.push(element.name);
+                          }
+                        });
+                      }
+                      break;
+                    default:
+                      names.forEach((n) => newContext.variables.locals.push(n));
+                  }
+                } else if (!t.isArrowFunctionExpression(init) && !t.isFunctionExpression(init)) {
+                  names.forEach((n) => newContext.variables.locals.push(n));
+                }
+              });
+            }
+          });
+        }
+
+        if (cursor && positionIn(node.loc, cursor, doc)) {
+          cursorFunctionContext = newContext;
+        }
+        allFunctionContexts.push(newContext);
       }
     },
   });
 
-  if (functionPaths.length === 0) {
-    return null;
-  }
-
-  // Sort paths by their start position to ensure correct nesting order
-  functionPaths.sort((a, b) => {
-    if (!a.node.loc || !b.node.loc) {
-      return 0;
+  // Link parent contexts
+  allFunctionContexts.forEach((ctx, index) => {
+    if (index > 0) {
+      for (let i = index - 1; i >= 0; i--) {
+        const parentCtx = allFunctionContexts[i];
+        if (parentCtx.insertPos.line < ctx.insertPos.line) {
+          ctx.parentContext = parentCtx;
+          break;
+        }
+      }
     }
-    return a.node.loc.start.line - b.node.loc.start.line || a.node.loc.start.column - b.node.loc.start.column;
   });
 
-  let currentContext: CodeContext | null = null;
-  let previousContext: CodeContext | null = null;
-
-  for (const path of functionPaths) {
-    const node = path.node;
-
-    const name =
-      (node as any).id?.name ||
-      ((node as any).key?.name as string) ||
-      (path.parent.type === 'VariableDeclarator' && (path.parent as any).id?.name) ||
-      'anonymous';
-
-    let isComponent = false;
-    path.traverse({
-      JSXElement() {
-        isComponent = true;
-        path.stop();
-      },
-      JSXFragment() {
-        isComponent = true;
-        path.stop();
-      },
-    });
-
-    const variables: VariableBuckets = {
-      props: [],
-      state: [],
-      refs: [],
-      context: [],
-      reducers: [],
-      locals: [],
-    };
-
-    let args: string[] = [];
-    if (node.params) {
-      node.params.forEach((param: t.LVal) => {
-        if (t.isObjectPattern(param) || t.isIdentifier(param) || t.isArrayPattern(param)) {
-          args.push(...extractVariableNames(param));
-        }
-      });
-    }
-
-    if (isComponent) {
-      variables.props = args;
-    }
-
-    const insertPos = findReturnInsertPosition(node, doc);
-
-    const newContext: CodeContext = {
-      type: isComponent ? 'react' : 'function',
-      name,
-      args,
-      insertPos,
-      variables: {
-        ...variables,
-      },
-      parentContext: previousContext || undefined, // Link to the previous context
-    };
-
-    // Class Method Logging
-    if (enableClassMethodLogging && t.isClassMethod(node)) {
-      traverse(node, {
-        MemberExpression(memberPath) {
-          if (t.isThisExpression(memberPath.node.object) && t.isIdentifier(memberPath.node.property)) {
-            if (memberPath.node.property.name === 'props') {
-              // Add props from class methods if not already present
-              if (!newContext.variables.props.includes('this.props')) {
-                newContext.variables.props.push('this.props');
-              }
-            } else if (memberPath.node.property.name === 'state') {
-              // Add state from class methods if not already present
-              if (!newContext.variables.state.includes('this.state')) {
-                newContext.variables.state.push('this.state');
-              }
-            }
-          }
-        },
-      }, path.scope, path.state, path.parentPath);
-    }
-
-    // Collect local variables directly from the function body
-    if (t.isBlockStatement(node.body)) {
-      node.body.body.forEach((bodyNode) => {
-        if (t.isVariableDeclaration(bodyNode)) {
-          bodyNode.declarations.forEach((declaration) => {
-            const id = declaration.id;
-            const init = declaration.init;
-
-            if (!t.isIdentifier(id) && !t.isArrayPattern(id) && !t.isObjectPattern(id)) {
-              return;
-            }
-
-            const names = extractVariableNames(id);
-
-            if (t.isCallExpression(init)) {
-              const callee = (init.callee as any).name || (init.callee as any).property?.name;
-
-              switch (callee) {
-                case 'useState':
-                  if (t.isArrayPattern(id) && id.elements[0] && t.isIdentifier(id.elements[0])) {
-                    newContext.variables.state.push(id.elements[0].name);
-                  }
-                  break;
-                case 'useRef':
-                  names.forEach((n) => newContext.variables.refs.push(n));
-                  break;
-                case 'useContext':
-                  names.forEach((n) => newContext.variables.context.push(n));
-                  break;
-                case 'useReducer':
-                  if (names.length >= 2) {
-                    newContext.variables.reducers.push(`${names[0]}: ${names[0]}, ${names[1]}: ${names[1]}`);
-                  }
-                  break;
-                case 'useCallback':
-                  // Do nothing, as these return functions and should not be logged as locals
-                  break;
-                case 'useEffect':
-                case 'useMemo':
-                  if (enableHookLogging && init.arguments.length > 1 && t.isArrayExpression(init.arguments[1])) {
-                    init.arguments[1].elements.forEach((element) => {
-                      if (t.isIdentifier(element)) {
-                        newContext.variables.locals.push(element.name);
-                      }
-                    });
-                  }
-                  break;
-                default:
-                  names.forEach((n) => newContext.variables.locals.push(n));
-              }
-            } else if (!t.isArrowFunctionExpression(init) && !t.isFunctionExpression(init)) {
-              names.forEach((n) => newContext.variables.locals.push(n));
-            }
-          });
-        }
-      });
-    }
-
-    currentContext = newContext;
-    previousContext = newContext;
+  if (cursor) {
+    return cursorFunctionContext;
+  } else if (allFunctionContexts.length > 0) {
+    return allFunctionContexts;
+  } else {
+    return null;
   }
-
-  return currentContext;
 }
 
 function extractVariableNames(id: t.Identifier | t.ArrayPattern | t.ObjectPattern): string[] {
