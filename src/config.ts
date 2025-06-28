@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 export interface ExtensionConfig {
   logTemplate: string;
-  logLevel: 'log' | 'warn' | 'error' | 'debug' | 'table';
+  logLevel: string;
   logItems: string[];
   addDebugger: boolean;
   logFunction: string;
@@ -14,7 +14,7 @@ export function getConfiguration(): ExtensionConfig {
   const config = vscode.workspace.getConfiguration('contextualConsoleLog');
   return {
     logTemplate: config.get<string>('logTemplate', '[${fileName} > ${functionName}]'),
-    logLevel: config.get<'log' | 'warn' | 'error' | 'debug' | 'table'>('logLevel', 'log'),
+    logLevel: config.get<string>('logLevel', 'log'),
     logItems: config.get<string[]>('logItems', ['props', 'state', 'refs', 'context', 'reducers', 'locals']),
     addDebugger: config.get<boolean>('addDebugger', false),
     logFunction: config.get<string>('logFunction', 'console'),

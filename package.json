@@ -19,6 +19,10 @@
       {
         "command": "contextualConsoleLog.wrapInConsoleLog",
         "title": "Wrap in console.log"
+      },
+      {
+        "command": "contextualConsoleLog.cleanLogs",
+        "title": "Clean Contextual Logs"
       }
     ],
     "keybindings": [
@@ -39,14 +43,7 @@
         "contextualConsoleLog.logLevel": {
           "type": "string",
           "default": "log",
-          "enum": [
-            "log",
-            "warn",
-            "error",
-            "debug",
-            "table"
-          ],
-          "description": "The logging level/method to use (e.g., 'log', 'warn', 'debug')."
+          "description": "The logging level/method to use (e.g., 'log', 'warn', 'debug', 'info', 'customMethod')."
         },
         "contextualConsoleLog.logFunction": {
           "type": "string",
