@@ -23,6 +23,14 @@
       {
         "command": "contextualConsoleLog.cleanLogs",
         "title": "Clean Contextual Logs"
+      },
+      {
+        "command": "contextualConsoleLog.insertLogForFile",
+        "title": "Insert Contextual console.log for File"
+      },
+      {
+        "command": "contextualConsoleLog.toggleLogging",
+        "title": "Toggle Contextual Log Insertion"
       }
     ],
     "keybindings": [

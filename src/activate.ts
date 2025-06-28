@@ -6,6 +6,24 @@ export function activate(context: vscode.ExtensionContext) {
   initLogger(true);
   logger.log('activate.ts ~ activate Contextual Console Log Extension Activated');
 
+  // Initialize logging state
+  vscode.commands.executeCommand('setContext', 'contextualConsoleLog.isLoggingEnabled', true);
+
+  // Create status bar item
+  const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  statusBarItem.command = 'contextualConsoleLog.toggleLogging';
+  statusBarItem.tooltip = 'Toggle Contextual Log Insertion';
+  statusBarItem.text = '$(check) Log';
+  statusBarItem.show();
+
+  // Register toggle command
+  const toggleLoggingDisposable = vscode.commands.registerCommand('contextualConsoleLog.toggleLogging', () => {
+    const currentState = context.globalState.get('contextualConsoleLog.isLoggingEnabled', true);
+    vscode.commands.executeCommand('setContext', 'contextualConsoleLog.isLoggingEnabled', !currentState);
+    statusBarItem.text = !currentState ? '$(check) Log' : '$(x) Log';
+    vscode.window.showInformationMessage(`Contextual Log Insertion ${!currentState ? 'Enabled' : 'Disabled'}.`);
+  });
+
   const insertLogDisposable = vscode.commands.registerCommand('contextualConsoleLog.insertLog', insertLogCommand);
 
   const wrapInConsoleLogDisposable = vscode.commands.registerCommand(
@@ -23,7 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
     insertLogForFileCommand,
   );
 
-  context.subscriptions.push(insertLogDisposable, wrapInConsoleLogDisposable, cleanLogsDisposable, insertLogForFileDisposable);
+  context.subscriptions.push(insertLogDisposable, wrapInConsoleLogDisposable, cleanLogsDisposable, insertLogForFileDisposable, statusBarItem, toggleLoggingDisposable);
 }
 
 export function deactivate() {
