@@ -15,6 +15,13 @@ export async function insertLogCommand(): Promise<void> {
   const code = doc.getText();
   const fileName = vscode.workspace.asRelativePath(doc.uri);
 
+  // Check if the file is ignored by .eslintignore or .prettierignore
+  const isIgnored = await isFileIgnored(doc.uri);
+  if (isIgnored) {
+    vscode.window.showInformationMessage('Log insertion skipped: File is ignored by .eslintignore or .prettierignore.');
+    return;
+  }
+
   const firstCursor = editor.selections[0].active;
   const firstContextInfo = parseCodeContextAtCursor(code, firstCursor, doc);
 
@@ -62,6 +69,36 @@ export async function insertLogCommand(): Promise<void> {
   const config = getConfiguration();
   const finalEdits = await addCustomLoggerImport(doc, edits, config.customLoggerImportStatement);
   await applyEditsWithPreview(editor, finalEdits, config.showPreview);
+}
+
+async function isFileIgnored(uri: vscode.Uri): Promise<boolean> {
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
+  if (!workspaceFolder) {
+    return false;
+  }
+
+  const workspacePath = workspaceFolder.uri.fsPath;
+  const relativePath = vscode.workspace.asRelativePath(uri);
+
+  // Simplified check: read .eslintignore and .prettierignore and check if the file path is included
+  const ignoreFiles = ['.eslintignore', '.prettierignore'];
+  for (const ignoreFile of ignoreFiles) {
+    const ignoreFilePath = vscode.Uri.joinPath(workspaceFolder.uri, ignoreFile);
+    try {
+      const content = await vscode.workspace.fs.readFile(ignoreFilePath);
+      const ignorePatterns = Buffer.from(content).toString('utf8').split(/\n/).filter(line => line.trim() !== '' && !line.startsWith('#'));
+
+      for (const pattern of ignorePatterns) {
+        // Very basic glob matching: check if the pattern is a direct match or a directory prefix
+        if (relativePath.startsWith(pattern) || relativePath === pattern) {
+          return true;
+        }
+      }
+    } catch (error) {
+      // Ignore if file not found
+    }
+  }
+  return false;
 }
 
 async function addCustomLoggerImport(
@@ -209,6 +246,13 @@ export async function insertLogForFileCommand(): Promise<void> {
   const code = doc.getText();
   const fileName = vscode.workspace.asRelativePath(doc.uri);
 
+  // Check if the file is ignored by .eslintignore or .prettierignore
+  const isIgnored = await isFileIgnored(doc.uri);
+  if (isIgnored) {
+    vscode.window.showInformationMessage('Log insertion skipped: File is ignored by .eslintignore or .prettierignore.');
+    return;
+  }
+
   const functionContexts = parseFileForFunctions(code, doc);
 
   if (functionContexts.length === 0) {
@@ -224,17 +268,15 @@ export async function insertLogForFileCommand(): Promise<void> {
       edits.push({ insertPos: context.insertPos, logLine });
     } catch (err) {
       logger.error(`Console log generation failed for function ${context.name}: ` + (err as Error).message);
-      logger.sendError(err as Error, { command: 'insertLogForFileCommand', functionName: context.name });
     }
   }
 
-  if (edits.length > 0) {
-    await editor.edit((editBuilder) => {
-      edits.forEach((edit) => {
-        editBuilder.insert(edit.insertPos, edit.logLine + '\n');
-      });
-    });
-    vscode.window.showInformationMessage(`Inserted logs for ${edits.length} functions/components.`);
+  const config = getConfiguration();
+  const finalEdits = await addCustomLoggerImport(doc, edits, config.customLoggerImportStatement);
+
+  if (finalEdits.length > 0) {
+    await applyEditsWithPreview(editor, finalEdits, config.showPreview);
+    vscode.window.showInformationMessage(`Inserted logs for ${finalEdits.length} functions/components.`);
   } else {
     vscode.window.showInformationMessage('No logs were generated for the functions/components in the file.');
   }
