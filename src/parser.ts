@@ -99,7 +99,7 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
 
         // Update the overall context if this is a more specific (deeper) context
         // or the first context found.
-        if (!context || (node.loc && positionIn(node.loc, cursor, doc))) {
+        if (node.loc && positionIn(node.loc, cursor, doc)) {
           context = currentContext;
         }
 
@@ -137,7 +137,7 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
                 default:
                   names.forEach((n) => currentContext.variables.locals.push(n));
               }
-            } else {
+            } else if (!t.isArrowFunctionExpression(init) && !t.isFunctionExpression(init)) {
               names.forEach((n) => currentContext.variables.locals.push(n));
             }
           },
