@@ -27,7 +27,7 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
   traverse(ast, {
     enter(path) {
       const node = path.node;
-      if (!node.loc || context) {return;}
+      if (!node.loc) {return;}
 
       if (
         positionIn(node.loc, cursor, doc) &&
@@ -86,6 +86,23 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
 
         logger.log('parser.ts ~ parseCodeContext ~ traverse ~ insertPos', { insertPos, firstParam, variables });
 
+        // Create a new context object for the current function/component
+        const currentContext: CodeContext = {
+          type: isComponent ? 'react' : 'function',
+          name,
+          args,
+          insertPos,
+          variables: {
+            ...variables,
+          },
+        };
+
+        // Update the overall context if this is a more specific (deeper) context
+        // or the first context found.
+        if (!context || (node.loc && positionIn(node.loc, cursor, doc))) {
+          context = currentContext;
+        }
+
         path.traverse({
           VariableDeclarator(inner) {
             const id = inner.node.id;
@@ -103,38 +120,28 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
               switch (callee) {
                 case 'useState':
                   if (t.isArrayPattern(id) && id.elements[0] && t.isIdentifier(id.elements[0])) {
-                    variables.state.push(id.elements[0].name);
+                    currentContext.variables.state.push(id.elements[0].name);
                   }
                   break;
                 case 'useRef':
-                  names.forEach((n) => variables.refs.push(n));
+                  names.forEach((n) => currentContext.variables.refs.push(n));
                   break;
                 case 'useContext':
-                  names.forEach((n) => variables.context.push(n));
+                  names.forEach((n) => currentContext.variables.context.push(n));
                   break;
                 case 'useReducer':
                   if (names.length >= 2) {
-                    variables.reducers.push(`${names[0]}: ${names[0]}, ${names[1]}: ${names[1]}`);
+                    currentContext.variables.reducers.push(`${names[0]}: ${names[0]}, ${names[1]}: ${names[1]}`);
                   }
                   break;
                 default:
-                  names.forEach((n) => variables.locals.push(n));
+                  names.forEach((n) => currentContext.variables.locals.push(n));
               }
             } else {
-              names.forEach((n) => variables.locals.push(n));
+              names.forEach((n) => currentContext.variables.locals.push(n));
             }
           },
         });
-
-        context = {
-          type: isComponent ? 'react' : 'function',
-          name,
-          args,
-          insertPos,
-          variables: {
-            ...variables,
-          },
-        };
         logger.log('parser.ts ~ parseCodeContext ~ final context', context);
       }
     },

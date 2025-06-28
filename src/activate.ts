@@ -33,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
       ...firstContextInfo.variables.context.map((c) => ({ label: `context: ${c}`, detail: 'Context' })),
       ...firstContextInfo.variables.reducers.map((r) => ({ label: `reducers: ${r}`, detail: 'Reducer' })),
       ...firstContextInfo.variables.locals.map((l) => ({ label: `locals: ${l}`, detail: 'Local' })),
-      ...firstContextInfo.args.map((a) => ({ label: `args: ${a}`, detail: 'Argument' })),
+      ...(firstContextInfo.type === 'function' ? firstContextInfo.args.map((a) => ({ label: `args: ${a}`, detail: 'Argument' })) : []),
     ];
 
     const selectedItems = await vscode.window.showQuickPick(allVariables, {
