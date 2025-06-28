@@ -1,4 +1,5 @@
 import { getConfiguration } from './config';
+import { logger } from './logger';
 import { CodeContext } from './types';
 
 function buildLogObject(context: CodeContext, logItemsConfig: string[]): string {
@@ -32,7 +33,7 @@ function buildLogObject(context: CodeContext, logItemsConfig: string[]): string 
 
 export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedItems?: string[]): string {
   const config = getConfiguration();
-  const { logTemplate, logMethod, addDebugger, logItems } = config;
+  const { logTemplate, logMethod, addDebugger, logItems, useLogger } = config;
 
   const prefix = logTemplate.replace('${fileName}', fileName).replace('${functionName}', ctx.name);
 
@@ -79,11 +80,10 @@ export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedI
     logObject = buildLogObject(ctx, logItems);
   }
 
-  let logLine = `console.${logMethod}('${prefix}', ${logObject});`;
+  let logLine = `${useLogger ? 'logger' : 'console'}.${logMethod}('${prefix}', ${logObject});`;
 
   if (addDebugger) {
-    logLine = `debugger;
-${logLine}`;
+    logLine = `debugger;\n${logLine}`;
   }
 
   return logLine;

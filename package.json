@@ -76,6 +76,21 @@
           "type": "boolean",
           "default": false,
           "description": "Insert a 'debugger;' statement along with the console log."
+        },
+        "contextualConsoleLog.useLogger": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use 'logger.log()' instead of 'console.log()'."
+        },
+        "contextualConsoleLog.enableClassMethodLogging": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable logging for class methods (e.g., 'this.props', 'this.state')."
+        },
+        "contextualConsoleLog.enableHookLogging": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable logging for variables within React hooks (useEffect, useMemo, useCallback)."
         }
       }
     }

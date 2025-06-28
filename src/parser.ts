@@ -5,6 +5,7 @@ import * as vscode from 'vscode';
 
 import { CodeContext } from './types';
 import { findReturnInsertPosition, positionIn } from './utils';
+import { getConfiguration } from './config';
 
 type VariableBuckets = {
   props: string[];
@@ -16,6 +17,9 @@ type VariableBuckets = {
 };
 
 export function parseCodeContext(code: string, cursor: vscode.Position, doc: vscode.TextDocument): CodeContext | null {
+  const config = getConfiguration();
+  const { enableClassMethodLogging, enableHookLogging } = config;
+
   const ast = parse(code, {
     sourceType: 'module',
     plugins: ['jsx', 'typescript'],
@@ -118,6 +122,27 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
       parentContext: previousContext || undefined, // Link to the previous context
     };
 
+    // Class Method Logging
+    if (enableClassMethodLogging && t.isClassMethod(node)) {
+      traverse(node, {
+        MemberExpression(memberPath) {
+          if (t.isThisExpression(memberPath.node.object) && t.isIdentifier(memberPath.node.property)) {
+            if (memberPath.node.property.name === 'props') {
+              // Add props from class methods if not already present
+              if (!newContext.variables.props.includes('this.props')) {
+                newContext.variables.props.push('this.props');
+              }
+            } else if (memberPath.node.property.name === 'state') {
+              // Add state from class methods if not already present
+              if (!newContext.variables.state.includes('this.state')) {
+                newContext.variables.state.push('this.state');
+              }
+            }
+          }
+        },
+      }, path.scope, path.state, path.parentPath);
+    }
+
     // Collect local variables directly from the function body
     if (t.isBlockStatement(node.body)) {
       node.body.body.forEach((bodyNode) => {
@@ -154,6 +179,16 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
                   break;
                 case 'useCallback':
                   // Do nothing, as these return functions and should not be logged as locals
+                  break;
+                case 'useEffect':
+                case 'useMemo':
+                  if (enableHookLogging && init.arguments.length > 1 && t.isArrayExpression(init.arguments[1])) {
+                    init.arguments[1].elements.forEach((element) => {
+                      if (t.isIdentifier(element)) {
+                        newContext.variables.locals.push(element.name);
+                      }
+                    });
+                  }
                   break;
                 default:
                   names.forEach((n) => newContext.variables.locals.push(n));
