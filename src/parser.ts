@@ -110,47 +110,51 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
       parentContext: previousContext || undefined, // Link to the previous context
     };
 
-    // Traverse within the current function's scope for VariableDeclarator
-    path.traverse({
-      VariableDeclarator(inner: NodePath<t.VariableDeclarator>) {
-        const id = inner.node.id;
-        const init = inner.node.init;
+    // Collect local variables directly from the function body
+    if (t.isBlockStatement(node.body)) {
+      node.body.body.forEach((bodyNode) => {
+        if (t.isVariableDeclaration(bodyNode)) {
+          bodyNode.declarations.forEach((declaration) => {
+            const id = declaration.id;
+            const init = declaration.init;
 
-        if (!t.isIdentifier(id) && !t.isArrayPattern(id) && !t.isObjectPattern(id)) { return; }
+            if (!t.isIdentifier(id) && !t.isArrayPattern(id) && !t.isObjectPattern(id)) { return; }
 
-        const names = extractVariableNames(id);
+            const names = extractVariableNames(id);
 
-        if (t.isCallExpression(init)) {
-          const callee = (init.callee as any).name || (init.callee as any).property?.name;
+            if (t.isCallExpression(init)) {
+              const callee = (init.callee as any).name || (init.callee as any).property?.name;
 
-          switch (callee) {
-            case 'useState':
-              if (t.isArrayPattern(id) && id.elements[0] && t.isIdentifier(id.elements[0])) {
-                newContext.variables.state.push(id.elements[0].name);
+              switch (callee) {
+                case 'useState':
+                  if (t.isArrayPattern(id) && id.elements[0] && t.isIdentifier(id.elements[0])) {
+                    newContext.variables.state.push(id.elements[0].name);
+                  }
+                  break;
+                case 'useRef':
+                  names.forEach((n) => newContext.variables.refs.push(n));
+                  break;
+                case 'useContext':
+                  names.forEach((n) => newContext.variables.context.push(n));
+                  break;
+                case 'useReducer':
+                  if (names.length >= 2) {
+                    newContext.variables.reducers.push(`${names[0]}: ${names[0]}, ${names[1]}: ${names[1]}`);
+                  }
+                  break;
+                case 'useCallback':
+                  // Do nothing, as these return functions and should not be logged as locals
+                  break;
+                default:
+                  names.forEach((n) => newContext.variables.locals.push(n));
               }
-              break;
-            case 'useRef':
-              names.forEach((n) => newContext.variables.refs.push(n));
-              break;
-            case 'useContext':
-              names.forEach((n) => newContext.variables.context.push(n));
-              break;
-            case 'useReducer':
-              if (names.length >= 2) {
-                newContext.variables.reducers.push(`${names[0]}: ${names[0]}, ${names[1]}: ${names[1]}`);
-              }
-              break;
-            case 'useCallback':
-              // Do nothing, as these return functions and should not be logged as locals
-              break;
-            default:
+            } else if (!t.isArrowFunctionExpression(init) && !t.isFunctionExpression(init)) {
               names.forEach((n) => newContext.variables.locals.push(n));
-          }
-        } else if (!t.isArrowFunctionExpression(init) && !t.isFunctionExpression(init)) {
-          names.forEach((n) => newContext.variables.locals.push(n));
+            }
+          });
         }
-      },
-    });
+      });
+    }
 
     currentContext = newContext;
     previousContext = newContext;
