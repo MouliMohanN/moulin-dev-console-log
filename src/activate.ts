@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
-import { initLogger, logger } from './logger';
 import { ConfigService } from './config';
 import { ContextService } from './contextService';
 import { LogGeneratorService } from './logGenerator';
-import { QuickPickService } from './quickPickService';
+import { initLogger, logger } from './logger';
 import { LogInsertionService } from './logInsertionService';
+import { QuickPickService } from './quickPickService';
 
 export function activate(context: vscode.ExtensionContext) {
   initLogger(true);
@@ -16,14 +16,12 @@ export function activate(context: vscode.ExtensionContext) {
   const quickPickService = new QuickPickService();
   const logInsertionService = new LogInsertionService(contextService, logGeneratorService, quickPickService);
 
-  const insertLogDisposable = vscode.commands.registerCommand(
-    'contextualConsoleLog.insertLog',
-    () => logInsertionService.insertLog()
+  const insertLogDisposable = vscode.commands.registerCommand('contextualConsoleLog.insertLog', () =>
+    logInsertionService.insertLog(),
   );
 
-  const wrapInConsoleLogDisposable = vscode.commands.registerCommand(
-    'contextualConsoleLog.wrapInConsoleLog',
-    () => logInsertionService.wrapInConsoleLog()
+  const wrapInConsoleLogDisposable = vscode.commands.registerCommand('contextualConsoleLog.wrapInConsoleLog', () =>
+    logInsertionService.wrapInConsoleLog(),
   );
 
   context.subscriptions.push(insertLogDisposable, wrapInConsoleLogDisposable);

@@ -43,24 +43,28 @@ export class ContextService {
       plugins: ['jsx', 'typescript'],
     });
 
-    const functionPaths: NodePath<t.FunctionDeclaration | t.ArrowFunctionExpression | t.FunctionExpression | t.ClassMethod>[] = [];
+    const functionPaths: NodePath<
+      t.FunctionDeclaration | t.ArrowFunctionExpression | t.FunctionExpression | t.ClassMethod
+    >[] = [];
 
     traverse(ast, {
       enter: (path) => {
         const node = path.node;
 
-        if (!node.loc) { return; }
+        if (!node.loc) {
+          return;
+        }
 
         if (
           positionIn(node.loc, cursor, doc) &&
-          (
-            t.isFunctionDeclaration(node) ||
+          (t.isFunctionDeclaration(node) ||
             t.isArrowFunctionExpression(node) ||
             t.isFunctionExpression(node) ||
-            t.isClassMethod(node)
-          )
+            t.isClassMethod(node))
         ) {
-          functionPaths.push(path as NodePath<t.FunctionDeclaration | t.ArrowFunctionExpression | t.FunctionExpression | t.ClassMethod>);
+          functionPaths.push(
+            path as NodePath<t.FunctionDeclaration | t.ArrowFunctionExpression | t.FunctionExpression | t.ClassMethod>,
+          );
         }
       },
     });
@@ -70,7 +74,9 @@ export class ContextService {
     }
 
     functionPaths.sort((a, b) => {
-      if (!a.node.loc || !b.node.loc) { return 0; }
+      if (!a.node.loc || !b.node.loc) {
+        return 0;
+      }
       return a.node.loc.start.line - b.node.loc.start.line || a.node.loc.start.column - b.node.loc.start.column;
     });
 
@@ -140,7 +146,9 @@ export class ContextService {
               const id = declaration.id;
               const init = declaration.init;
 
-              if (!t.isIdentifier(id) && !t.isArrayPattern(id) && !t.isObjectPattern(id)) { return; }
+              if (!t.isIdentifier(id) && !t.isArrayPattern(id) && !t.isObjectPattern(id)) {
+                return;
+              }
 
               const names = extractVariableNames(id);
 

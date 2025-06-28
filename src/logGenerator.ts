@@ -1,5 +1,5 @@
-import { CodeContext } from './types';
 import { ConfigService } from './config';
+import { CodeContext } from './types';
 
 export class LogGeneratorService {
   private configService: ConfigService;
@@ -82,7 +82,6 @@ export class LogGeneratorService {
         }
       }
       logObject = parts.length > 0 ? `{ ${parts.join(', ')} }` : '';
-
     } else {
       logObject = this.buildLogObject(ctx, logItems);
     }

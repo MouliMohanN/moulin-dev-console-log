@@ -26,19 +26,16 @@ export class ConfigService {
     return {
       logTemplate: this.config.get<string>('logTemplate', '[${fileName} > ${functionName}]'),
       logMethod: this.config.get<'log' | 'warn' | 'error' | 'debug' | 'table'>('logMethod', 'log'),
-      logItems: this.config.get<string[]>('logItems', [
-        'props',
-        'state',
-        'refs',
-        'context',
-        'reducers',
-        'locals',
-      ]),
+      logItems: this.config.get<string[]>('logItems', ['props', 'state', 'refs', 'context', 'reducers', 'locals']),
       addDebugger: this.config.get<boolean>('addDebugger', false),
     };
   }
 
-  public onDidChangeConfiguration(callback: (e: vscode.ConfigurationChangeEvent) => any, thisArgs?: any, disposables?: vscode.Disposable[]): vscode.Disposable {
+  public onDidChangeConfiguration(
+    callback: (e: vscode.ConfigurationChangeEvent) => any,
+    thisArgs?: any,
+    disposables?: vscode.Disposable[],
+  ): vscode.Disposable {
     return vscode.workspace.onDidChangeConfiguration(callback, thisArgs, disposables);
   }
 }
