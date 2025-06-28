@@ -15,6 +15,10 @@
       {
         "command": "contextualConsoleLog.insertLog",
         "title": "Insert Contextual console.log"
+      },
+      {
+        "command": "contextualConsoleLog.wrapInConsoleLog",
+        "title": "Wrap in console.log"
       }
     ],
     "keybindings": [
@@ -23,10 +27,62 @@
         "key": "ctrl+shift+l",
         "when": "editorTextFocus"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Contextual Console Log",
+      "properties": {
+        "contextualConsoleLog.logTemplate": {
+          "type": "string",
+          "default": "[${fileName} > ${functionName}]",
+          "description": "Custom template for the log message prefix. Available variables: ${fileName}, ${functionName}."
+        },
+        "contextualConsoleLog.logMethod": {
+          "type": "string",
+          "default": "log",
+          "enum": [
+            "log",
+            "warn",
+            "error",
+            "debug",
+            "table"
+          ],
+          "description": "The console method to use for logging."
+        },
+        "contextualConsoleLog.logItems": {
+          "type": "array",
+          "default": [
+            "props",
+            "state",
+            "refs",
+            "context",
+            "reducers",
+            "locals"
+          ],
+          "items": {
+            "type": "string",
+            "enum": [
+              "props",
+              "state",
+              "refs",
+              "context",
+              "reducers",
+              "locals",
+              "args"
+            ]
+          },
+          "description": "The items to include in the log."
+        },
+        "contextualConsoleLog.addDebugger": {
+          "type": "boolean",
+          "default": false,
+          "description": "Insert a 'debugger;' statement along with the console log."
+        }
+      }
+    }
   },
   "activationEvents": [
-    "onCommand:contextualConsoleLog.insertLog"
+    "onCommand:contextualConsoleLog.insertLog",
+    "onCommand:contextualConsoleLog.wrapInConsoleLog"
   ],
   "scripts": {
     "vscode:prepublish": "npm run package",

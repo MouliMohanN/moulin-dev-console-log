@@ -31,10 +31,14 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
 
       if (
         positionIn(node.loc, cursor, doc) &&
-        (t.isFunctionDeclaration(node) || t.isArrowFunctionExpression(node) || t.isFunctionExpression(node))
+        (t.isFunctionDeclaration(node) ||
+          t.isArrowFunctionExpression(node) ||
+          t.isFunctionExpression(node) ||
+          t.isClassMethod(node))
       ) {
         const name =
           (node as any).id?.name ||
+          ((node as any).key?.name as string) ||
           (path.parent.type === 'VariableDeclarator' && (path.parent as any).id?.name) ||
           'anonymous';
 
@@ -91,6 +95,8 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
 
             const names = extractVariableNames(id);
 
+            logger.log('parser.ts ~ VariableDeclarator', { id, init, names });
+
             if (t.isCallExpression(init)) {
               const callee = (init.callee as any).name || (init.callee as any).property?.name;
 
@@ -125,8 +131,11 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
           name,
           args,
           insertPos,
-          ...variables,
+          variables: {
+            ...variables,
+          },
         };
+        logger.log('parser.ts ~ parseCodeContext ~ final context', context);
       }
     },
   });
