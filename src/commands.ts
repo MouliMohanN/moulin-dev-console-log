@@ -60,7 +60,28 @@ export async function insertLogCommand(): Promise<void> {
   }
 
   const config = getConfiguration();
-  await applyEditsWithPreview(editor, edits, config.showPreview);
+  const finalEdits = await addCustomLoggerImport(doc, edits, config.customLoggerImportStatement);
+  await applyEditsWithPreview(editor, finalEdits, config.showPreview);
+}
+
+async function addCustomLoggerImport(
+  doc: vscode.TextDocument,
+  edits: { insertPos: vscode.Position; logLine: string }[],
+  customLoggerImportStatement: string,
+): Promise<{ insertPos: vscode.Position; logLine: string }[]> {
+  if (!customLoggerImportStatement) {
+    return edits;
+  }
+
+  const fileContent = doc.getText();
+  // Simple check to see if the import statement (or a very similar one) already exists
+  if (fileContent.includes(customLoggerImportStatement.trim())) {
+    return edits;
+  }
+
+  // Add the import statement at the top of the file
+  const importEdit = { insertPos: new vscode.Position(0, 0), logLine: customLoggerImportStatement + '\n' };
+  return [importEdit, ...edits];
 }
 
 async function applyEditsWithPreview(

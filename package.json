@@ -121,6 +121,11 @@
           "type": "boolean",
           "default": false,
           "description": "Enable logging for Redux/Context stores (e.g., useSelector, useContext)."
+        },
+        "contextualConsoleLog.customLoggerImportStatement": {
+          "type": "string",
+          "default": "",
+          "description": "Optional: A custom import statement for your logger (e.g., 'import { logger } from \"@my-org/logger\";'). If provided, this will be inserted at the top of the file."
         }
       }
     },

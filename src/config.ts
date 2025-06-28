@@ -13,6 +13,7 @@ export interface ExtensionConfig {
   showPreview: boolean;
   enableTelemetry: boolean;
   enableReduxContextLogging: boolean;
+  customLoggerImportStatement: string;
 }
 
 export function getConfiguration(): ExtensionConfig {
@@ -30,6 +31,7 @@ export function getConfiguration(): ExtensionConfig {
     showPreview: config.get<boolean>('showPreview', false),
     enableTelemetry: config.get<boolean>('enableTelemetry', true),
     enableReduxContextLogging: config.get<boolean>('enableReduxContextLogging', false),
+    customLoggerImportStatement: config.get<string>('customLoggerImportStatement', ''),
   };
 }
 
