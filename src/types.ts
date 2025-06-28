@@ -13,4 +13,5 @@ export interface CodeContext {
     locals: string[];
   };
   insertPos: vscode.Position;
+  parentContext?: CodeContext; // Add this line
 }

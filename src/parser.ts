@@ -21,7 +21,7 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
     plugins: ['jsx', 'typescript'],
   });
 
-  let innermostFunctionPath: any = null; // Using 'any' for simplicity, will be a NodePath
+  const functionPaths: NodePath<t.FunctionDeclaration | t.ArrowFunctionExpression | t.FunctionExpression | t.ClassMethod>[] = [];
 
   traverse(ast, {
     enter(path) {
@@ -36,25 +36,26 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
           t.isFunctionExpression(node) ||
           t.isClassMethod(node))
       ) {
-        // If this is the first function found, or if this function is more "inner"
-        // than the previously found one, update innermostFunctionPath.
-        if (!innermostFunctionPath || (
-            node.loc.start.line >= innermostFunctionPath.node.loc!.start.line &&
-            node.loc.end.line <= innermostFunctionPath.node.loc!.end.line &&
-            (node.loc.end.line - node.loc.start.line < innermostFunctionPath.node.loc!.end.line - innermostFunctionPath.node.loc!.start.line ||
-             (node.loc.end.line - node.loc.start.line === innermostFunctionPath.node.loc!.end.line - innermostFunctionPath.node.loc!.start.line &&
-              node.loc.start.column >= innermostFunctionPath.node.loc!.start.column &&
-              node.loc.end.column <= innermostFunctionPath.node.loc!.end.column))
-        )) {
-          innermostFunctionPath = path;
-        }
+        functionPaths.push(path as NodePath<t.FunctionDeclaration | t.ArrowFunctionExpression | t.FunctionExpression | t.ClassMethod>);
       }
     },
   });
 
-  if (innermostFunctionPath) {
-    const node = innermostFunctionPath.node;
-    const path = innermostFunctionPath; // Use the path of the innermost function
+  if (functionPaths.length === 0) {
+    return null;
+  }
+
+  // Sort paths by their start position to ensure correct nesting order
+  functionPaths.sort((a, b) => {
+    if (!a.node.loc || !b.node.loc) { return 0; }
+    return a.node.loc.start.line - b.node.loc.start.line || a.node.loc.start.column - b.node.loc.start.column;
+  });
+
+  let currentContext: CodeContext | null = null;
+  let previousContext: CodeContext | null = null;
+
+  for (const path of functionPaths) {
+    const node = path.node;
 
     const name =
       (node as any).id?.name ||
@@ -62,7 +63,6 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
       (path.parent.type === 'VariableDeclarator' && (path.parent as any).id?.name) ||
       'anonymous';
 
-    // JSX detection
     let isComponent = false;
     path.traverse({
       JSXElement() {
@@ -99,7 +99,7 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
 
     const insertPos = findReturnInsertPosition(node, doc);
 
-    const currentContext: CodeContext = {
+    const newContext: CodeContext = {
       type: isComponent ? 'react' : 'function',
       name,
       args,
@@ -107,10 +107,11 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
       variables: {
         ...variables,
       },
+      parentContext: previousContext || undefined, // Link to the previous context
     };
 
-    // Now, traverse only within the innermost function's scope for VariableDeclarator
-    innermostFunctionPath.traverse({
+    // Traverse within the current function's scope for VariableDeclarator
+    path.traverse({
       VariableDeclarator(inner: NodePath<t.VariableDeclarator>) {
         const id = inner.node.id;
         const init = inner.node.init;
@@ -125,35 +126,37 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
           switch (callee) {
             case 'useState':
               if (t.isArrayPattern(id) && id.elements[0] && t.isIdentifier(id.elements[0])) {
-                currentContext.variables.state.push(id.elements[0].name);
+                newContext.variables.state.push(id.elements[0].name);
               }
               break;
             case 'useRef':
-              names.forEach((n) => currentContext.variables.refs.push(n));
+              names.forEach((n) => newContext.variables.refs.push(n));
               break;
             case 'useContext':
-              names.forEach((n) => currentContext.variables.context.push(n));
+              names.forEach((n) => newContext.variables.context.push(n));
               break;
             case 'useReducer':
               if (names.length >= 2) {
-                currentContext.variables.reducers.push(`${names[0]}: ${names[0]}, ${names[1]}: ${names[1]}`);
+                newContext.variables.reducers.push(`${names[0]}: ${names[0]}, ${names[1]}: ${names[1]}`);
               }
               break;
             case 'useCallback':
               // Do nothing, as these return functions and should not be logged as locals
               break;
             default:
-              names.forEach((n) => currentContext.variables.locals.push(n));
+              names.forEach((n) => newContext.variables.locals.push(n));
           }
         } else if (!t.isArrowFunctionExpression(init) && !t.isFunctionExpression(init)) {
-          names.forEach((n) => currentContext.variables.locals.push(n));
+          names.forEach((n) => newContext.variables.locals.push(n));
         }
       },
     });
-    return currentContext;
+
+    currentContext = newContext;
+    previousContext = newContext;
   }
 
-  return null;
+  return currentContext;
 }
 
 function extractVariableNames(id: t.Identifier | t.ArrayPattern | t.ObjectPattern): string[] {
