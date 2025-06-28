@@ -126,6 +126,14 @@
           "type": "string",
           "default": "",
           "description": "Optional: A custom import statement for your logger (e.g., 'import { logger } from \"@my-org/logger\";'). If provided, this will be inserted at the top of the file."
+        },
+        "contextualConsoleLog.sensitiveKeys": {
+          "type": "array",
+          "default": ["password", "token", "secret", "api_key"],
+          "items": {
+            "type": "string"
+          },
+          "description": "List of variable names to exclude from log generation."
         }
       }
     },

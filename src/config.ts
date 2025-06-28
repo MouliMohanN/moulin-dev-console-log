@@ -14,6 +14,7 @@ export interface ExtensionConfig {
   enableTelemetry: boolean;
   enableReduxContextLogging: boolean;
   customLoggerImportStatement: string;
+  sensitiveKeys: string[];
 }
 
 export function getConfiguration(): ExtensionConfig {
@@ -32,6 +33,7 @@ export function getConfiguration(): ExtensionConfig {
     enableTelemetry: config.get<boolean>('enableTelemetry', true),
     enableReduxContextLogging: config.get<boolean>('enableReduxContextLogging', false),
     customLoggerImportStatement: config.get<string>('customLoggerImportStatement', ''),
+    sensitiveKeys: config.get<string[]>('sensitiveKeys', ['password', 'token', 'secret', 'api_key']),
   };
 }
 

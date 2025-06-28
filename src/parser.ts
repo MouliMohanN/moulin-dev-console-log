@@ -216,6 +216,9 @@ function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?:
         // Filter out unused variables
         filterUnusedVariables(newContext.variables, path.scope);
 
+        // Filter out sensitive keys
+        filterSensitiveKeys(newContext.variables, config.sensitiveKeys);
+
         if (cursor && positionIn(node.loc, cursor, doc)) {
           cursorFunctionContext = newContext;
         }
@@ -265,6 +268,13 @@ function filterUnusedVariables(variables: VariableBuckets, scope: any) {
       // A binding exists and has references, or it's a global/implicit variable (no binding)
       return !binding || binding.referenced;
     });
+  }
+}
+
+function filterSensitiveKeys(variables: VariableBuckets, sensitiveKeys: string[]) {
+  for (const key in variables) {
+    const category = key as keyof VariableBuckets;
+    variables[category] = variables[category].filter(name => !sensitiveKeys.includes(name));
   }
 }
 
