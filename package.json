@@ -56,7 +56,7 @@
         "contextualConsoleLog.logFunction": {
           "type": "string",
           "default": "console",
-          "description": "The base logging function to use (e.g., 'console', 'myLogger')."
+          "description": "The base logging function to use (e.g., 'console', 'myLogger'). For monorepos or custom setups, you can specify a global variable or a function available in the current scope."
         },
         "contextualConsoleLog.logItems": {
           "type": "array",
