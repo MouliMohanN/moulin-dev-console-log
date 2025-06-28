@@ -33,7 +33,7 @@ function buildLogObject(context: CodeContext, logItemsConfig: string[]): string 
 
 export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedItems?: string[]): string {
   const config = getConfiguration();
-  const { logTemplate, logMethod, addDebugger, logItems, useLogger } = config;
+  const { logTemplate, logLevel, addDebugger, logItems, logFunction } = config;
 
   const prefix = logTemplate.replace('${fileName}', fileName).replace('${functionName}', ctx.name);
 
@@ -80,7 +80,7 @@ export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedI
     logObject = buildLogObject(ctx, logItems);
   }
 
-  let logLine = `${useLogger ? 'logger' : 'console'}.${logMethod}('${prefix}', ${logObject});`;
+  let logLine = `${logFunction}.${logLevel}('${prefix}', ${logObject});`;
 
   if (addDebugger) {
     logLine = `debugger;\n${logLine}`;

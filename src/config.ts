@@ -2,10 +2,10 @@ import * as vscode from 'vscode';
 
 export interface ExtensionConfig {
   logTemplate: string;
-  logMethod: 'log' | 'warn' | 'error' | 'debug' | 'table';
+  logLevel: 'log' | 'warn' | 'error' | 'debug' | 'table';
   logItems: string[];
   addDebugger: boolean;
-  useLogger: boolean;
+  logFunction: string;
   enableClassMethodLogging: boolean;
   enableHookLogging: boolean;
 }
@@ -14,10 +14,10 @@ export function getConfiguration(): ExtensionConfig {
   const config = vscode.workspace.getConfiguration('contextualConsoleLog');
   return {
     logTemplate: config.get<string>('logTemplate', '[${fileName} > ${functionName}]'),
-    logMethod: config.get<'log' | 'warn' | 'error' | 'debug' | 'table'>('logMethod', 'log'),
+    logLevel: config.get<'log' | 'warn' | 'error' | 'debug' | 'table'>('logLevel', 'log'),
     logItems: config.get<string[]>('logItems', ['props', 'state', 'refs', 'context', 'reducers', 'locals']),
     addDebugger: config.get<boolean>('addDebugger', false),
-    useLogger: config.get<boolean>('useLogger', false),
+    logFunction: config.get<string>('logFunction', 'console'),
     enableClassMethodLogging: config.get<boolean>('enableClassMethodLogging', false),
     enableHookLogging: config.get<boolean>('enableHookLogging', false),
   };

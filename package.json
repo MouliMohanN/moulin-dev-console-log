@@ -36,7 +36,7 @@
           "default": "[${fileName} > ${functionName}]",
           "description": "Custom template for the log message prefix. Available variables: ${fileName}, ${functionName}."
         },
-        "contextualConsoleLog.logMethod": {
+        "contextualConsoleLog.logLevel": {
           "type": "string",
           "default": "log",
           "enum": [
@@ -46,7 +46,12 @@
             "debug",
             "table"
           ],
-          "description": "The console method to use for logging."
+          "description": "The logging level/method to use (e.g., 'log', 'warn', 'debug')."
+        },
+        "contextualConsoleLog.logFunction": {
+          "type": "string",
+          "default": "console",
+          "description": "The base logging function to use (e.g., 'console', 'myLogger')."
         },
         "contextualConsoleLog.logItems": {
           "type": "array",
@@ -77,11 +82,7 @@
           "default": false,
           "description": "Insert a 'debugger;' statement along with the console log."
         },
-        "contextualConsoleLog.useLogger": {
-          "type": "boolean",
-          "default": false,
-          "description": "Use 'logger.log()' instead of 'console.log()'."
-        },
+        
         "contextualConsoleLog.enableClassMethodLogging": {
           "type": "boolean",
           "default": false,
