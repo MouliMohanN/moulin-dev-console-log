@@ -134,6 +134,10 @@ export function parseCodeContext(code: string, cursor: vscode.Position, doc: vsc
                     currentContext.variables.reducers.push(`${names[0]}: ${names[0]}, ${names[1]}: ${names[1]}`);
                   }
                   break;
+                case 'useCallback':
+                case 'useMemo':
+                  // Do nothing, as these return functions and should not be logged as locals
+                  break;
                 default:
                   names.forEach((n) => currentContext.variables.locals.push(n));
               }
