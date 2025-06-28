@@ -1,40 +1,33 @@
 import * as vscode from 'vscode';
 import { CodeContext } from './types';
 
-function buildLogObject(context: CodeContext, logItemsConfig: string[]): any {
-  const obj: any = {};
+function buildLogObject(context: CodeContext, logItemsConfig: string[]): string {
+  const parts: string[] = [];
 
-  const addVariables = (variables: any, prefix: string = '') => {
-    if (logItemsConfig.includes('args') && context.type === 'function' && context.args.length) {
-      obj[`${prefix}args`] = `{ ${context.args.join(', ')} }`;
-    }
-    if (logItemsConfig.includes('props') && variables.props.length) {
-      obj[`${prefix}props`] = `{ ${variables.props.join(', ')} }`;
-    }
-    if (logItemsConfig.includes('state') && variables.state.length) {
-      obj[`${prefix}state`] = `{ ${variables.state.join(', ')} }`;
-    }
-    if (logItemsConfig.includes('refs') && variables.refs.length) {
-      obj[`${prefix}refs`] = `{ ${variables.refs.map((s: string) => `${s}: ${s}.current`).join(', ')} }`;
-    }
-    if (logItemsConfig.includes('context') && variables.context.length) {
-      obj[`${prefix}context`] = `{ ${variables.context.join(', ')} }`;
-    }
-    if (logItemsConfig.includes('reducers') && variables.reducers.length) {
-      obj[`${prefix}reducer`] = `{ ${variables.reducers.join(', ')} }`;
-    }
-    if (logItemsConfig.includes('locals') && variables.locals.length) {
-      obj[`${prefix}locals`] = `{ ${variables.locals.join(', ')} }`;
+  const addVariables = (variables: { [key: string]: string[] }, prefix: string = '') => {
+    for (const key in variables) {
+      if (logItemsConfig.includes(key) && variables[key].length) {
+        if (key === 'refs') {
+          parts.push(`${prefix}${key}: { ${variables[key].map((s: string) => `${s}: ${s}.current`).join(', ')} }`);
+        } else if (key === 'reducers') {
+          parts.push(`${prefix}reducer: { ${variables[key].join(', ')} }`);
+        } else if (key === 'args' && context.type !== 'function') {
+          // Skip args if not a function context
+          continue;
+        } else {
+          parts.push(`${prefix}${key}: { ${variables[key].join(', ')} }`);
+        }
+      }
     }
   };
 
   addVariables(context.variables);
 
   if (context.parentContext) {
-    obj.parent = buildLogObject(context.parentContext, logItemsConfig);
+    parts.push(`parent: ${buildLogObject(context.parentContext, logItemsConfig)}`);
   }
 
-  return obj;
+  return `{ ${parts.join(', ')} }`;
 }
 
 export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedItems?: string[]): string {
@@ -57,44 +50,44 @@ export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedI
 
   if (selectedItems) {
     // If specific items are selected, only log those from the current context
-    const selectedMap: { [key: string]: string[] } = {
-      props: [],
-      state: [],
-      refs: [],
-      context: [],
-      reducers: [],
-      locals: [],
-      args: [],
-    };
+    const selectedMap: { [key: string]: string[] } = {};
+
+    // Initialize selectedMap with all possible variable types from the context
+    for (const typeKey in ctx.variables) {
+      selectedMap[typeKey] = [];
+    }
 
     selectedItems.forEach((item) => {
-      const [type, name] = item.split(': ');
-      if (selectedMap[type]) {
+      const parts = item.split(': ');
+      // Handle cases where the item label might not have a type prefix (e.g., for args)
+      const type = parts.length > 1 ? parts[0].toLowerCase() : 'locals'; // Default to locals if no explicit type
+      const name = parts.length > 1 ? parts.slice(1).join(': ') : parts[0];
+
+      // Special handling for 'args' which might not have a type prefix in the quick pick label
+      if (type === 'args' && ctx.type === 'function') {
+        selectedMap.args.push(name);
+      } else if (selectedMap[type]) {
+        selectedMap[type].push(name);
+      } else {
+        // If it's a custom type, add it to selectedMap
+        selectedMap[type] = selectedMap[type] || [];
         selectedMap[type].push(name);
       }
     });
 
     const parts: string[] = [];
-    if (selectedMap.args.length) {
-      parts.push(`args: { ${selectedMap.args.join(', ')} }`);
-    }
-    if (selectedMap.props.length) {
-      parts.push(`props: { ${selectedMap.props.join(', ')} }`);
-    }
-    if (selectedMap.state.length) {
-      parts.push(`state: { ${selectedMap.state.join(', ')} }`);
-    }
-    if (selectedMap.refs.length) {
-      parts.push(`refs: { ${selectedMap.refs.map((s) => `${s}: ${s}.current`).join(', ')} }`);
-    }
-    if (selectedMap.context.length) {
-      parts.push(`context: { ${selectedMap.context.join(', ')} }`);
-    }
-    if (selectedMap.reducers.length) {
-      parts.push(`reducer: { ${selectedMap.reducers.join(', ')} }`);
-    }
-    if (selectedMap.locals.length) {
-      parts.push(`locals: { ${selectedMap.locals.join(', ')} }`);
+    for (const typeKey in selectedMap) {
+      if (selectedMap[typeKey].length) {
+        if (typeKey === 'refs') {
+          parts.push(`refs: { ${selectedMap[typeKey].map((s) => `${s}: ${s}.current`).join(', ')} }`);
+        } else if (typeKey === 'reducers') {
+          parts.push(`reducer: { ${selectedMap[typeKey].join(', ')} }`);
+        } else if (typeKey === 'args') {
+          parts.push(`args: { ${selectedMap[typeKey].join(', ')} }`);
+        } else {
+          parts.push(`${typeKey}: { ${selectedMap[typeKey].join(', ')} }`);
+        }
+      }
     }
     logObject = parts.length > 0 ? `{ ${parts.join(', ')} }` : '';
 
@@ -103,7 +96,7 @@ export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedI
     logObject = buildLogObject(ctx, logItemsConfig);
   }
 
-  let logLine = `console.${logMethod}('${prefix}', ${JSON.stringify(logObject, null, 2)});`;
+  let logLine = `console.${logMethod}('${prefix}', ${logObject});`;
 
   if (addDebugger) {
     logLine = `debugger;\n${logLine}`;
