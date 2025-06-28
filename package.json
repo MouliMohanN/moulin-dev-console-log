@@ -79,7 +79,6 @@
           "default": false,
           "description": "Insert a 'debugger;' statement along with the console log."
         },
-        
         "contextualConsoleLog.enableClassMethodLogging": {
           "type": "boolean",
           "default": false,
@@ -92,8 +91,8 @@
         },
         "contextualConsoleLog.logTag": {
           "type": "string",
-          "default": "// @contextual-log",
-          "description": "A unique tag to identify logs inserted by the extension for easier cleanup."
+          "default": "",
+          "description": "A unique tag to identify logs inserted by the extension for easier cleanup. Example: '// @my-log-tag' or '/* LOG_TAG */'"
         },
         "contextualConsoleLog.wrapInDevCheck": {
           "type": "boolean",
