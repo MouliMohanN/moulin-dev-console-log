@@ -99,13 +99,11 @@ function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?:
           variables.props = args;
         }
 
-        const insertPos = findReturnInsertPosition(node, doc);
-
         const newContext: CodeContext = {
           type: isComponent ? 'react' : 'function',
           name,
           args,
-          insertPos,
+          insertPos: new vscode.Position(0, 0), // Temporary, will be set below
           variables: {
             ...variables,
           },
@@ -169,12 +167,21 @@ function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?:
                       break;
                     case 'useEffect':
                     case 'useMemo':
-                      if (enableHookLogging && init.arguments.length > 1 && t.isArrayExpression(init.arguments[1])) {
-                        init.arguments[1].elements.forEach((element) => {
-                          if (t.isIdentifier(element)) {
-                            newContext.variables.locals.push(element.name);
+                    case 'useCallback':
+                      if (enableHookLogging && init.arguments.length > 0) {
+                        const callbackArg = init.arguments[0];
+                        if (t.isArrowFunctionExpression(callbackArg) || t.isFunctionExpression(callbackArg)) {
+                          if (callbackArg.body.loc) {
+                            newContext.hookBodyEndPos = new vscode.Position(callbackArg.body.loc.end.line - 1, callbackArg.body.loc.end.column);
                           }
-                        });
+                        }
+                        if (init.arguments.length > 1 && t.isArrayExpression(init.arguments[1])) {
+                          init.arguments[1].elements.forEach((element) => {
+                            if (t.isIdentifier(element)) {
+                              newContext.variables.locals.push(element.name);
+                            }
+                          });
+                        }
                       }
                       break;
                     default:
@@ -187,6 +194,9 @@ function parseAndExtractContext(code: string, doc: vscode.TextDocument, cursor?:
             }
           });
         }
+
+        // Determine the final insert position
+        newContext.insertPos = newContext.hookBodyEndPos || findReturnInsertPosition(node, doc);
 
         if (cursor && positionIn(node.loc, cursor, doc)) {
           cursorFunctionContext = newContext;

@@ -13,5 +13,6 @@ export interface CodeContext {
     locals: string[];
   };
   insertPos: vscode.Position;
+  hookBodyEndPos?: vscode.Position;
   parentContext?: CodeContext; // Add this line
 }
