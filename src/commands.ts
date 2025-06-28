@@ -1,0 +1,67 @@
+import * as vscode from 'vscode';
+import { generateConsoleLog } from './logGenerator';
+import { logger } from './logger';
+import { parseCodeContext } from './parser';
+import { showVariableQuickPick } from './quickPick';
+export async function insertLogCommand(): Promise<void> {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    return;
+  }
+  const doc = editor.document;
+  const code = doc.getText();
+  const fileName = vscode.workspace.asRelativePath(doc.uri);
+  const firstCursor = editor.selections[0].active;
+  const firstContextInfo = parseCodeContext(code, firstCursor, doc);
+  if (!firstContextInfo) {
+    logger.warn('No valid context found for logging at the first cursor.', {
+      doc,
+      cursor: firstCursor,
+      code,
+      fileName,
+    });
+    return;
+  }
+  const selectedItems = await showVariableQuickPick(firstContextInfo);
+  const edits: { insertPos: vscode.Position; logLine: string }[] = [];
+  for (const selection of editor.selections) {
+    const cursor = selection.active;
+    try {
+      const contextInfo = parseCodeContext(code, cursor, doc);
+      if (!contextInfo) {
+        logger.warn('No valid context found for logging.', { doc, cursor, code, fileName });
+        continue;
+      }
+      let logLine: string;
+      if (selectedItems && selectedItems.length > 0) {
+        const selectedLabels = selectedItems.map((item) => item.label);
+        logLine = generateConsoleLog(contextInfo, fileName, selectedLabels);
+      } else {
+        logLine = generateConsoleLog(contextInfo, fileName);
+      }
+      edits.push({ insertPos: contextInfo.insertPos, logLine });
+    } catch (err) {
+      logger.error('Console log generation failed: ' + (err as Error).message);
+    }
+  }
+  await editor.edit((editBuilder) => {
+    edits.forEach((edit) => {
+      editBuilder.insert(edit.insertPos, edit.logLine + '\n');
+    });
+  });
+}
+export async function wrapInConsoleLogCommand(): Promise<void> {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    return;
+  }
+  await editor.edit((editBuilder) => {
+    for (const selection of editor.selections) {
+      const selectedText = editor.document.getText(selection);
+      if (selectedText) {
+        const logLine = `console.log({ ${selectedText} });`;
+        editBuilder.replace(selection, logLine);
+      }
+    }
+  });
+}
