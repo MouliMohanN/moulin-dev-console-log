@@ -103,6 +103,11 @@
           "type": "boolean",
           "default": false,
           "description": "Show a preview of the log insertion before applying changes."
+        },
+        "contextualConsoleLog.enableTelemetry": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable anonymous telemetry to help improve the extension."
         }
       }
     },

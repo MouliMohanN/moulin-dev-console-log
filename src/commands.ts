@@ -203,6 +203,7 @@ export async function insertLogForFileCommand(): Promise<void> {
       edits.push({ insertPos: context.insertPos, logLine });
     } catch (err) {
       logger.error(`Console log generation failed for function ${context.name}: ` + (err as Error).message);
+      logger.sendError(err as Error, { command: 'insertLogForFileCommand', functionName: context.name });
     }
   }
 

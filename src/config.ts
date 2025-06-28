@@ -11,6 +11,7 @@ export interface ExtensionConfig {
   logTag: string;
   wrapInDevCheck: boolean;
   showPreview: boolean;
+  enableTelemetry: boolean;
 }
 
 export function getConfiguration(): ExtensionConfig {
@@ -26,6 +27,7 @@ export function getConfiguration(): ExtensionConfig {
     logTag: config.get<string>('logTag', '// @contextual-log'),
     wrapInDevCheck: config.get<boolean>('wrapInDevCheck', false),
     showPreview: config.get<boolean>('showPreview', false),
+    enableTelemetry: config.get<boolean>('enableTelemetry', true),
   };
 }
 
