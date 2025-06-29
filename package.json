@@ -15,6 +15,22 @@
       {
         "command": "contextualConsoleLog.insertLog",
         "title": "Insert Contextual console.log"
+      },
+      {
+        "command": "contextualConsoleLog.wrapInConsoleLog",
+        "title": "Wrap in console.log"
+      },
+      {
+        "command": "contextualConsoleLog.cleanLogs",
+        "title": "Clean Contextual Logs"
+      },
+      {
+        "command": "contextualConsoleLog.insertLogForFile",
+        "title": "Insert Contextual console.log for File"
+      },
+      {
+        "command": "contextualConsoleLog.toggleLogging",
+        "title": "Toggle Contextual Log Insertion"
       }
     ],
     "keybindings": [
@@ -23,11 +39,134 @@
         "key": "ctrl+shift+l",
         "when": "editorTextFocus"
       }
+    ],
+    "configuration": {
+      "title": "Contextual Console Log",
+      "properties": {
+        "contextualConsoleLog.logTemplate": {
+          "type": "string",
+          "default": "[${fileName} > ${functionName}]",
+          "description": "Custom template for the log message prefix. Available variables: ${fileName}, ${functionName}."
+        },
+        "contextualConsoleLog.logLevel": {
+          "type": "string",
+          "default": "log",
+          "description": "The logging level/method to use (e.g., 'log', 'warn', 'debug', 'info', 'customMethod')."
+        },
+        "contextualConsoleLog.logFunction": {
+          "type": "string",
+          "default": "console",
+          "description": "The base logging function to use (e.g., 'console', 'myLogger'). For monorepos or custom setups, you can specify a global variable or a function available in the current scope."
+        },
+        "contextualConsoleLog.logItems": {
+          "type": "array",
+          "default": [
+            "props",
+            "state",
+            "refs",
+            "context",
+            "reducers",
+            "locals"
+          ],
+          "items": {
+            "type": "string",
+            "enum": [
+              "props",
+              "state",
+              "refs",
+              "context",
+              "reducers",
+              "locals",
+              "args"
+            ]
+          },
+          "description": "The items to include in the log."
+        },
+        "contextualConsoleLog.addDebugger": {
+          "type": "boolean",
+          "default": false,
+          "description": "Insert a 'debugger;' statement along with the console log."
+        },
+        "contextualConsoleLog.enableClassMethodLogging": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable logging for class methods (e.g., 'this.props', 'this.state')."
+        },
+        "contextualConsoleLog.enableHookLogging": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable logging for variables within React hooks (useEffect, useMemo, useCallback)."
+        },
+        "contextualConsoleLog.logTag": {
+          "type": "string",
+          "default": "",
+          "description": "A unique tag to identify logs inserted by the extension for easier cleanup. Example: '// @my-log-tag' or '/* LOG_TAG */'"
+        },
+        "contextualConsoleLog.wrapInDevCheck": {
+          "type": "boolean",
+          "default": false,
+          "description": "Wrap inserted logs in an environment check (e.g., `if (process.env.NODE_ENV !== 'production')`)."
+        },
+        "contextualConsoleLog.showPreview": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show a preview of the log insertion before applying changes."
+        },
+        "contextualConsoleLog.enableTelemetry": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable anonymous telemetry to help improve the extension."
+        },
+        "contextualConsoleLog.enableReduxContextLogging": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable logging for Redux/Context stores (e.g., useSelector, useContext)."
+        },
+        "contextualConsoleLog.customLoggerImportStatement": {
+          "type": "string",
+          "default": "",
+          "description": "Optional: A custom import statement for your logger (e.g., 'import { logger } from \"@my-org/logger\";'). If provided, this will be inserted at the top of the file."
+        },
+        "contextualConsoleLog.sensitiveKeys": {
+          "type": "array",
+          "default": [
+            "password",
+            "token",
+            "secret",
+            "api_key"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "List of variable names to exclude from log generation."
+        },
+        "contextualConsoleLog.ignore": {
+          "type": "array",
+          "default": [],
+          "description": "An array of glob patterns for files/folders to ignore. These patterns are in addition to .eslintignore and .prettierignore.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contextualConsoleLog.filterUnusedVariables": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable filtering of unused variables from log suggestions."
+        },
+        "contextualConsoleLog.enableDuplicatePrevention": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable smart duplicate log prevention."
+        }
+      }
+    },
+    "activationEvents": [
+      "onCommand:contextualConsoleLog.insertLog",
+      "onCommand:contextualConsoleLog.wrapInConsoleLog",
+      "onCommand:contextualConsoleLog.cleanLogs",
+      "onCommand:contextualConsoleLog.insertLogForFile"
     ]
   },
-  "activationEvents": [
-    "onCommand:contextualConsoleLog.insertLog"
-  ],
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "npm run check-types && npm run lint && node esbuild.js",
