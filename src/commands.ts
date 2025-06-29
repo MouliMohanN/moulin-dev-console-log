@@ -191,7 +191,10 @@ const privateUtils = {
         } else {
           logLine = generateConsoleLog(contextInfo, fileName);
         }
-        if (config.enableDuplicatePrevention && privateUtils.isDuplicateLog(editor.document, contextInfo.insertPos, logLine)) {
+        if (
+          config.enableDuplicatePrevention &&
+          privateUtils.isDuplicateLog(editor.document, contextInfo.insertPos, logLine)
+        ) {
           logger.warn('Skipping duplicate log insertion.', { logLine });
         } else {
           edits.push({ insertPos: contextInfo.insertPos, logLine });

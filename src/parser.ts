@@ -340,7 +340,9 @@ const privateUtils = {
     traverse(ast, {
       enter(path) {
         const node = path.node;
-        if (!node.loc) { return; }
+        if (!node.loc) {
+          return;
+        }
 
         // Check if the node is on the same line as the cursor
         if (node.loc.start.line - 1 === cursor.line) {
@@ -358,14 +360,14 @@ const privateUtils = {
           }
           // Call Expression (e.g., someFunction(arg1, arg2);)
           else if (t.isCallExpression(node)) {
-            node.arguments.forEach(arg => {
+            node.arguments.forEach((arg) => {
               if (t.isIdentifier(arg)) {
                 suggestions.push(arg.name);
               }
             });
           }
         }
-      }
+      },
     });
     return [...new Set(suggestions)]; // Return unique suggestions
   },

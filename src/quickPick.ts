@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { CodeContext } from './types';
-import { logger } from './logger';
 
 const privateUtils = {
   getScopePrefix(depth: number, contextName: string): string {
@@ -27,8 +26,8 @@ export async function showVariableQuickPick(contextInfo: CodeContext): Promise<v
       allVariables.push({ label: suggestion, detail: 'Suggested (based on cursor position)' });
     });
     // Add a separator if there are other variables to follow
-    if (Object.values(contextInfo.variables).some(arr => arr.length > 0) || contextInfo.args.length > 0) {
-        allVariables.push({ label: '──────────', kind: vscode.QuickPickItemKind.Separator });
+    if (Object.values(contextInfo.variables).some((arr) => arr.length > 0) || contextInfo.args.length > 0) {
+      allVariables.push({ label: '──────────', kind: vscode.QuickPickItemKind.Separator });
     }
   }
 
@@ -48,7 +47,12 @@ export async function showVariableQuickPick(contextInfo: CodeContext): Promise<v
     privateUtils.addVariablesToQuickPick(allVariables, currentContext.variables.context, 'context', scopePrefix);
     privateUtils.addVariablesToQuickPick(allVariables, currentContext.variables.reducers, 'reducers', scopePrefix);
     privateUtils.addVariablesToQuickPick(allVariables, currentContext.variables.locals, 'locals', scopePrefix);
-    privateUtils.addVariablesToQuickPick(allVariables, currentContext.variables.reduxContext, 'reduxContext', scopePrefix);
+    privateUtils.addVariablesToQuickPick(
+      allVariables,
+      currentContext.variables.reduxContext,
+      'reduxContext',
+      scopePrefix,
+    );
 
     currentContext = currentContext.parentContext;
     depth++;
@@ -59,14 +63,13 @@ export async function showVariableQuickPick(contextInfo: CodeContext): Promise<v
     placeHolder: 'Select items to log',
   });
 
-  const updatedSelectedItems = selectedItems?.map(item => {
-    
-    return {
-      ...item,
-      label: item.label.replace(/Parent ([^:]+): /, ''), // Remove
-      
-    };
-  }) || [];
-  
+  const updatedSelectedItems =
+    selectedItems?.map((item) => {
+      return {
+        ...item,
+        label: item.label.replace(/Parent ([^:]+): /, ''), // Remove
+      };
+    }) || [];
+
   return updatedSelectedItems;
 }
