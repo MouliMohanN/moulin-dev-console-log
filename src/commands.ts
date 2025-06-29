@@ -175,6 +175,7 @@ const privateUtils = {
     selectedItems: vscode.QuickPickItem[] | undefined,
   ): Promise<{ insertPos: vscode.Position; logLine: string }[]> {
     const edits: { insertPos: vscode.Position; logLine: string }[] = [];
+    const config = getConfiguration();
     for (const selection of editor.selections) {
       const cursor = selection.active;
       try {
@@ -190,10 +191,10 @@ const privateUtils = {
         } else {
           logLine = generateConsoleLog(contextInfo, fileName);
         }
-        if (!privateUtils.isDuplicateLog(editor.document, contextInfo.insertPos, logLine)) {
-          edits.push({ insertPos: contextInfo.insertPos, logLine });
-        } else {
+        if (config.enableDuplicatePrevention && privateUtils.isDuplicateLog(editor.document, contextInfo.insertPos, logLine)) {
           logger.warn('Skipping duplicate log insertion.', { logLine });
+        } else {
+          edits.push({ insertPos: contextInfo.insertPos, logLine });
         }
       } catch (err) {
         logger.error('Console log generation failed: ' + (err as Error).message);

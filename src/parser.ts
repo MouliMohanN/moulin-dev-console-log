@@ -75,7 +75,9 @@ const privateUtils = {
             });
           }
           newContext.insertPos = newContext.hookBodyEndPos || findReturnInsertPosition(node as any, doc);
-          privateUtils.filterUnusedVariables(newContext.variables, path.scope);
+          if (config.filterUnusedVariables) {
+            privateUtils.filterUnusedVariables(newContext.variables, path.scope);
+          }
           privateUtils.filterSensitiveKeys(newContext.variables, config.sensitiveKeys);
           if (cursor && positionIn(node.loc, cursor, doc)) {
             cursorFunctionContext = newContext;

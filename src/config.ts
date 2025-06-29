@@ -16,6 +16,8 @@ export interface ExtensionConfig {
   customLoggerImportStatement: string;
   sensitiveKeys: string[];
   ignore: string[];
+  filterUnusedVariables: boolean;
+  enableDuplicatePrevention: boolean;
 }
 
 export function getConfiguration(): ExtensionConfig {
@@ -36,6 +38,8 @@ export function getConfiguration(): ExtensionConfig {
     customLoggerImportStatement: config.get<string>('customLoggerImportStatement', ''),
     sensitiveKeys: config.get<string[]>('sensitiveKeys', ['password', 'token', 'secret', 'api_key']),
     ignore: config.get<string[]>('ignore', []),
+    filterUnusedVariables: config.get<boolean>('filterUnusedVariables', true),
+    enableDuplicatePrevention: config.get<boolean>('enableDuplicatePrevention', true),
   };
 }
 

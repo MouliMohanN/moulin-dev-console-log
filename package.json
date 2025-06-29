@@ -147,6 +147,16 @@
           "items": {
             "type": "string"
           }
+        },
+        "contextualConsoleLog.filterUnusedVariables": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable filtering of unused variables from log suggestions."
+        },
+        "contextualConsoleLog.enableDuplicatePrevention": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable smart duplicate log prevention."
         }
       }
     },
