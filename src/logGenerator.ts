@@ -1,10 +1,8 @@
 import { getConfiguration } from './config';
 import { CodeContext } from './types';
 
-function buildLogObject(context: CodeContext, logItemsConfig: string[]): string {
-  const parts: string[] = [];
-
-  const addVariables = (variables: { [key: string]: string[] }, prefix: string = '') => {
+const privateUtils = {
+  addVariables(variables: { [key: string]: string[] }, logItemsConfig: string[], context: CodeContext, parts: string[], prefix: string = '') {
     for (const key in variables) {
       if (logItemsConfig.includes(key) && variables[key].length) {
         if (key === 'refs') {
@@ -12,44 +10,38 @@ function buildLogObject(context: CodeContext, logItemsConfig: string[]): string 
         } else if (key === 'reducers') {
           parts.push(`${prefix}reducer: { ${variables[key].join(', ')} }`);
         } else if (key === 'args' && context.type !== 'function') {
-          // Skip args if not a function context
           continue;
         } else {
           parts.push(`${prefix}${key}: { ${variables[key].join(', ')} }`);
         }
       }
     }
-  };
+  },
 
-  addVariables(context.variables);
+  buildParentLogObject(context: CodeContext, logItemsConfig: string[]): string | undefined {
+    if (context.parentContext) {
+      return `parent: ${privateUtils.buildLogObject(context.parentContext, logItemsConfig)}`;
+    }
+    return undefined;
+  },
 
-  if (context.parentContext) {
-    parts.push(`parent: ${buildLogObject(context.parentContext, logItemsConfig)}`);
-  }
+  buildLogObject(context: CodeContext, logItemsConfig: string[]): string {
+    const parts: string[] = [];
+    privateUtils.addVariables(context.variables, logItemsConfig, context, parts);
+    const parent = privateUtils.buildParentLogObject(context, logItemsConfig);
+    if (parent) { parts.push(parent); }
+    return `{ ${parts.join(', ')} }`;
+  },
 
-  return `{ ${parts.join(', ')} }`;
-}
-
-export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedItems?: string[]): string {
-  const config = getConfiguration();
-  const { logTemplate, logLevel, addDebugger, logItems, logFunction, logTag, wrapInDevCheck } = config;
-
-  const prefix = logTemplate.replace('${fileName}', fileName).replace('${functionName}', ctx.name);
-
-  let logObject: string = '';
-
-  if (selectedItems && selectedItems.length > 0) {
+  createSelectedMap(ctx: CodeContext, selectedItems: string[]): { [key: string]: string[] } {
     const selectedMap: { [key: string]: string[] } = {};
-
     for (const typeKey in ctx.variables) {
       selectedMap[typeKey] = [];
     }
-
     selectedItems.forEach((item) => {
       const parts = item.split(': ');
       const type = parts.length > 1 ? parts[0].toLowerCase() : 'locals';
       const name = parts.length > 1 ? parts.slice(1).join(': ') : parts[0];
-
       if (type === 'args' && ctx.type === 'function') {
         selectedMap.args.push(name);
       } else if (selectedMap[type]) {
@@ -59,7 +51,10 @@ export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedI
         selectedMap[type].push(name);
       }
     });
+    return selectedMap;
+  },
 
+  stringifySelectedMap(selectedMap: { [key: string]: string[] }): string {
     const parts: string[] = [];
     for (const typeKey in selectedMap) {
       if (selectedMap[typeKey].length) {
@@ -76,24 +71,34 @@ export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedI
         }
       }
     }
-    logObject = parts.length > 0 ? `{ ${parts.join(', ')} }` : '';
+    return parts.length > 0 ? `{ ${parts.join(', ')} }` : '';
+  },
+
+  formatLogLine(logFunction: string, logLevel: string, prefix: string, logObject: string, wrapInDevCheck: boolean, logTag: string, addDebugger: boolean): string {
+    let logLine = `${logFunction}.${logLevel}('${prefix}', ${logObject});`;
+    if (wrapInDevCheck) {
+      logLine = `if (process.env.NODE_ENV !== 'production') {\n  ${logLine}\n}`;
+    }
+    if (logTag) {
+      logLine = `${logLine} ${logTag}`;
+    }
+    if (addDebugger) {
+      logLine = `debugger;\n${logLine}`;
+    }
+    return logLine;
+  }
+};
+
+export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedItems?: string[]): string {
+  const config = getConfiguration();
+  const { logTemplate, logLevel, addDebugger, logItems, logFunction, logTag, wrapInDevCheck } = config;
+  const prefix = logTemplate.replace('${fileName}', fileName).replace('${functionName}', ctx.name);
+  let logObject: string = '';
+  if (selectedItems && selectedItems.length > 0) {
+    const selectedMap = privateUtils.createSelectedMap(ctx, selectedItems);
+    logObject = privateUtils.stringifySelectedMap(selectedMap);
   } else {
-    logObject = buildLogObject(ctx, logItems);
+    logObject = privateUtils.buildLogObject(ctx, logItems);
   }
-
-  let logLine = `${logFunction}.${logLevel}('${prefix}', ${logObject});`;
-
-  if (wrapInDevCheck) {
-    logLine = `if (process.env.NODE_ENV !== 'production') {\n  ${logLine}\n}`; // Indent the log line
-  }
-
-  if (logTag) {
-    logLine = `${logLine} ${logTag}`;
-  }
-
-  if (addDebugger) {
-    logLine = `debugger;\n${logLine}`;
-  }
-
-  return logLine;
+  return privateUtils.formatLogLine(logFunction, logLevel, prefix, logObject, wrapInDevCheck, logTag, addDebugger);
 }
