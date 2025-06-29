@@ -14,27 +14,33 @@
     "commands": [
       {
         "command": "contextualConsoleLog.insertLog",
-        "title": "Insert Contextual console.log"
+        "title": "Insert Contextual log",
+        "category": "ccl"
       },
       {
         "command": "contextualConsoleLog.wrapInConsoleLog",
-        "title": "Wrap in console.log"
+        "title": "Wrap log",
+        "category": "ccl"
       },
       {
         "command": "contextualConsoleLog.cleanLogs",
-        "title": "Clean Contextual Logs"
+        "title": "Remove Logs",
+        "category": "ccl"
       },
       {
         "command": "contextualConsoleLog.insertLogForFile",
-        "title": "Insert Contextual console.log for File"
+        "title": "Insert logs throughout the entire file",
+        "category": "ccl"
       },
       {
         "command": "contextualConsoleLog.toggleLogging",
-        "title": "Toggle Contextual Log Insertion"
+        "title": "Toggle Log Insertion",
+        "category": "ccl"
       },
       {
         "command": "contextualConsoleLog.openTemplateEditor",
-        "title": "Open Log Template Editor"
+        "title": "Open Log Template Editor",
+        "category": "ccl"
       }
     ],
     "keybindings": [
