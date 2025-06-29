@@ -1,6 +1,17 @@
 import * as vscode from 'vscode';
 import { CodeContext } from './types';
 
+const privateUtils = {
+  getScopePrefix(depth: number, contextName: string): string {
+    return depth === 0 ? '' : `Parent (${contextName}): `;
+  },
+  addVariablesToQuickPick(allVariables: vscode.QuickPickItem[], variableArray: string[], typeLabel: string, scopePrefix: string) {
+    variableArray.forEach((name: string) => {
+      allVariables.push({ label: `${scopePrefix}${typeLabel}: ${name}`, detail: typeLabel });
+    });
+  },
+};
+
 export async function showVariableQuickPick(contextInfo: CodeContext): Promise<vscode.QuickPickItem[] | undefined> {
   const allVariables: vscode.QuickPickItem[] = [];
 
@@ -8,24 +19,18 @@ export async function showVariableQuickPick(contextInfo: CodeContext): Promise<v
   let depth = 0;
 
   while (currentContext) {
-    const scopePrefix = depth === 0 ? '' : `Parent (${currentContext.name}): `;
-
-    const addVariablesToQuickPick = (variableArray: string[], typeLabel: string) => {
-      variableArray.forEach((name: string) => {
-        allVariables.push({ label: `${scopePrefix}${typeLabel}: ${name}`, detail: typeLabel });
-      });
-    };
+    const scopePrefix = privateUtils.getScopePrefix(depth, currentContext.name);
 
     if (currentContext.type === 'function') {
-      addVariablesToQuickPick(currentContext.args, 'args');
+      privateUtils.addVariablesToQuickPick(allVariables, currentContext.args, 'args', scopePrefix);
     }
 
-    addVariablesToQuickPick(currentContext.variables.props, 'props');
-    addVariablesToQuickPick(currentContext.variables.state, 'state');
-    addVariablesToQuickPick(currentContext.variables.refs, 'refs');
-    addVariablesToQuickPick(currentContext.variables.context, 'context');
-    addVariablesToQuickPick(currentContext.variables.reducers, 'reducers');
-    addVariablesToQuickPick(currentContext.variables.locals, 'locals');
+    privateUtils.addVariablesToQuickPick(allVariables, currentContext.variables.props, 'props', scopePrefix);
+    privateUtils.addVariablesToQuickPick(allVariables, currentContext.variables.state, 'state', scopePrefix);
+    privateUtils.addVariablesToQuickPick(allVariables, currentContext.variables.refs, 'refs', scopePrefix);
+    privateUtils.addVariablesToQuickPick(allVariables, currentContext.variables.context, 'context', scopePrefix);
+    privateUtils.addVariablesToQuickPick(allVariables, currentContext.variables.reducers, 'reducers', scopePrefix);
+    privateUtils.addVariablesToQuickPick(allVariables, currentContext.variables.locals, 'locals', scopePrefix);
 
     currentContext = currentContext.parentContext;
     depth++;

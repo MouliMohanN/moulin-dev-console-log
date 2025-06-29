@@ -134,6 +134,78 @@ const privateUtils = {
     const lines = privateUtils.getNearbyLines(doc, insertPos);
     return lines.some(lineText => lineText === logLine.trim());
   },
+
+  isFileIgnoredOrNotify: async function(doc: vscode.TextDocument): Promise<boolean> {
+    const isIgnored = await privateUtils.isFileIgnored(doc.uri);
+    if (isIgnored) {
+      vscode.window.showInformationMessage('Log insertion skipped: File is ignored by .eslintignore or .prettierignore.');
+      return true;
+    }
+    return false;
+  },
+
+  getEditsForSelections: async function(editor: vscode.TextEditor, code: string, fileName: string, selectedItems: vscode.QuickPickItem[] | undefined): Promise<{ insertPos: vscode.Position; logLine: string }[]> {
+    const edits: { insertPos: vscode.Position; logLine: string }[] = [];
+    for (const selection of editor.selections) {
+      const cursor = selection.active;
+      try {
+        const contextInfo = parseCodeContextAtCursor(code, cursor, editor.document);
+        if (!contextInfo) {
+          logger.warn('No valid context found for logging.', { doc: editor.document, cursor, code, fileName });
+          continue;
+        }
+        let logLine: string;
+        if (selectedItems && selectedItems.length > 0) {
+          const selectedLabels = selectedItems.map((item) => item.label);
+          logLine = generateConsoleLog(contextInfo, fileName, selectedLabels);
+        } else {
+          logLine = generateConsoleLog(contextInfo, fileName);
+        }
+        if (!privateUtils.isDuplicateLog(editor.document, contextInfo.insertPos, logLine)) {
+          edits.push({ insertPos: contextInfo.insertPos, logLine });
+        } else {
+          logger.warn('Skipping duplicate log insertion.', { logLine });
+        }
+      } catch (err) {
+        logger.error('Console log generation failed: ' + (err as Error).message);
+      }
+    }
+    return edits;
+  },
+
+  getLinesToDelete: function(doc: vscode.TextDocument, logTag: string): vscode.Range[] {
+    const linesToDelete: vscode.Range[] = [];
+    for (let i = 0; i < doc.lineCount; i++) {
+      const line = doc.lineAt(i);
+      if (line.text.includes(logTag)) {
+        linesToDelete.push(line.rangeIncludingLineBreak);
+      }
+    }
+    return linesToDelete;
+  },
+
+  getEditsForFunctionContexts: function(functionContexts: any[], fileName: string): { insertPos: vscode.Position; logLine: string }[] {
+    const edits: { insertPos: vscode.Position; logLine: string }[] = [];
+    for (const context of functionContexts) {
+      try {
+        const logLine = generateConsoleLog(context, fileName);
+        edits.push({ insertPos: context.insertPos, logLine });
+      } catch (err) {
+        logger.error(`Console log generation failed for function ${context.name}: ` + (err as Error).message);
+      }
+    }
+    return edits;
+  },
+
+  handleInsertLogForFileResult: async function(editor: vscode.TextEditor, doc: vscode.TextDocument, edits: { insertPos: vscode.Position; logLine: string }[], config: any) {
+    const finalEdits = await privateUtils.addCustomLoggerImport(doc, edits, config.customLoggerImportStatement);
+    if (finalEdits.length > 0) {
+      await privateUtils.applyEditsWithPreview(editor, finalEdits, config.showPreview);
+      vscode.window.showInformationMessage(`Inserted logs for ${finalEdits.length} functions/components.`);
+    } else {
+      vscode.window.showInformationMessage('No logs were generated for the functions/components in the file.');
+    }
+  },
 };
 
 // Exported functions only
@@ -147,10 +219,7 @@ export async function insertLogCommand(): Promise<void> {
   const code = doc.getText();
   const fileName = vscode.workspace.asRelativePath(doc.uri);
 
-  // Check if the file is ignored by .eslintignore or .prettierignore
-  const isIgnored = await privateUtils.isFileIgnored(doc.uri);
-  if (isIgnored) {
-    vscode.window.showInformationMessage('Log insertion skipped: File is ignored by .eslintignore or .prettierignore.');
+  if (await privateUtils.isFileIgnoredOrNotify(doc)) {
     return;
   }
 
@@ -169,34 +238,7 @@ export async function insertLogCommand(): Promise<void> {
 
   const selectedItems = await showVariableQuickPick(firstContextInfo);
 
-  const edits: { insertPos: vscode.Position; logLine: string }[] = [];
-
-  for (const selection of editor.selections) {
-    const cursor = selection.active;
-    try {
-      const contextInfo = parseCodeContextAtCursor(code, cursor, doc);
-
-      if (!contextInfo) {
-        logger.warn('No valid context found for logging.', { doc, cursor, code, fileName });
-        continue;
-      }
-
-      let logLine: string;
-      if (selectedItems && selectedItems.length > 0) {
-        const selectedLabels = selectedItems.map((item) => item.label);
-        logLine = generateConsoleLog(contextInfo, fileName, selectedLabels);
-      } else {
-        logLine = generateConsoleLog(contextInfo, fileName);
-      }
-      if (!privateUtils.isDuplicateLog(doc, contextInfo.insertPos, logLine)) {
-        edits.push({ insertPos: contextInfo.insertPos, logLine });
-      } else {
-        logger.warn('Skipping duplicate log insertion.', { logLine });
-      }
-    } catch (err) {
-      logger.error('Console log generation failed: ' + (err as Error).message);
-    }
-  }
+  const edits = await privateUtils.getEditsForSelections(editor, code, fileName, selectedItems);
 
   const config = getConfiguration();
   const finalEdits = await privateUtils.addCustomLoggerImport(doc, edits, config.customLoggerImportStatement);
@@ -230,14 +272,7 @@ export async function cleanLogsCommand(): Promise<void> {
   const config = getConfiguration();
   const logTag = config.logTag;
 
-  const linesToDelete: vscode.Range[] = [];
-  for (let i = 0; i < doc.lineCount; i++) {
-    const line = doc.lineAt(i);
-    if (line.text.includes(logTag)) {
-      linesToDelete.push(line.rangeIncludingLineBreak);
-    }
-  }
-
+  const linesToDelete = privateUtils.getLinesToDelete(doc, logTag);
   if (linesToDelete.length > 0) {
     await editor.edit((editBuilder) => {
       linesToDelete.forEach((range) => {
@@ -260,10 +295,7 @@ export async function insertLogForFileCommand(): Promise<void> {
   const code = doc.getText();
   const fileName = vscode.workspace.asRelativePath(doc.uri);
 
-  // Check if the file is ignored by .eslintignore or .prettierignore
-  const isIgnored = await privateUtils.isFileIgnored(doc.uri);
-  if (isIgnored) {
-    vscode.window.showInformationMessage('Log insertion skipped: File is ignored by .eslintignore or .prettierignore.');
+  if (await privateUtils.isFileIgnoredOrNotify(doc)) {
     return;
   }
 
@@ -274,24 +306,8 @@ export async function insertLogForFileCommand(): Promise<void> {
     return;
   }
 
-  const edits: { insertPos: vscode.Position; logLine: string }[] = [];
-
-  for (const context of functionContexts) {
-    try {
-      const logLine = generateConsoleLog(context, fileName);
-      edits.push({ insertPos: context.insertPos, logLine });
-    } catch (err) {
-      logger.error(`Console log generation failed for function ${context.name}: ` + (err as Error).message);
-    }
-  }
+  const edits = privateUtils.getEditsForFunctionContexts(functionContexts, fileName);
 
   const config = getConfiguration();
-  const finalEdits = await privateUtils.addCustomLoggerImport(doc, edits, config.customLoggerImportStatement);
-
-  if (finalEdits.length > 0) {
-    await privateUtils.applyEditsWithPreview(editor, finalEdits, config.showPreview);
-    vscode.window.showInformationMessage(`Inserted logs for ${finalEdits.length} functions/components.`);
-  } else {
-    vscode.window.showInformationMessage('No logs were generated for the functions/components in the file.');
-  }
+  await privateUtils.handleInsertLogForFileResult(editor, doc, edits, config);
 }
