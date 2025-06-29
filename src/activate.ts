@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
     const currentState = context.globalState.get('contextualConsoleLog.isLoggingEnabled', true);
     vscode.commands.executeCommand('setContext', 'contextualConsoleLog.isLoggingEnabled', !currentState);
     statusBarItem.text = !currentState ? '$(check) Log' : '$(x) Log';
-    vscode.window.showInformationMessage(`Contextual Log Insertion ${!currentState ? 'Enabled' : 'Disabled'}.`);
+    logger.info(`Contextual Log Insertion ${!currentState ? 'Enabled' : 'Disabled'}.`);
   });
 
   const insertLogDisposable = vscode.commands.registerCommand('contextualConsoleLog.insertLog', insertLogCommand);

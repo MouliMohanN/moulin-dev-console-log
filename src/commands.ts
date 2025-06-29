@@ -122,7 +122,7 @@ const privateUtils = {
       if (confirmed) {
         await vscode.workspace.applyEdit(workspaceEdit);
       } else {
-        vscode.window.showInformationMessage('Log insertion cancelled.');
+        logger.info('Log insertion cancelled.');
       }
       await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
     } else {
@@ -148,7 +148,7 @@ const privateUtils = {
   isFileIgnoredOrNotify: async function(doc: vscode.TextDocument): Promise<boolean> {
     const isIgnored = await privateUtils.isFileIgnored(doc.uri);
     if (isIgnored) {
-      vscode.window.showInformationMessage('Log insertion skipped: File is ignored by .eslintignore or .prettierignore.');
+      logger.info('Log insertion skipped: File is ignored by .eslintignore or .prettierignore.');
       return true;
     }
     return false;
@@ -211,9 +211,9 @@ const privateUtils = {
     const finalEdits = await privateUtils.addCustomLoggerImport(doc, edits, config.customLoggerImportStatement);
     if (finalEdits.length > 0) {
       await privateUtils.applyEditsWithPreview(editor, finalEdits, config.showPreview);
-      vscode.window.showInformationMessage(`Inserted logs for ${finalEdits.length} functions/components.`);
+      logger.info(`Inserted logs for ${finalEdits.length} functions/components.`);
     } else {
-      vscode.window.showInformationMessage('No logs were generated for the functions/components in the file.');
+      logger.info('No logs were generated for the functions/components in the file.');
     }
   },
 };
@@ -289,9 +289,9 @@ export async function cleanLogsCommand(): Promise<void> {
         editBuilder.delete(range);
       });
     });
-    vscode.window.showInformationMessage(`Cleaned ${linesToDelete.length} contextual logs.`);
+    logger.info(`Cleaned ${linesToDelete.length} contextual logs.`);
   } else {
-    vscode.window.showInformationMessage('No contextual logs found to clean.');
+        logger.info('No contextual logs found to clean.');
   }
 }
 
@@ -312,7 +312,7 @@ export async function insertLogForFileCommand(): Promise<void> {
   const functionContexts = parseFileForFunctions(code, doc);
 
   if (functionContexts.length === 0) {
-    vscode.window.showInformationMessage('No functions or components found in the file to log.');
+    logger.info('No functions or components found in the file to log.');
     return;
   }
 
