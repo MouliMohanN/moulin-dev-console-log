@@ -20,6 +20,17 @@ const privateUtils = {
 export async function showVariableQuickPick(contextInfo: CodeContext): Promise<vscode.QuickPickItem[] | undefined> {
   const allVariables: vscode.QuickPickItem[] = [];
 
+  // Add smart suggestions first
+  if (contextInfo.smartSuggestions && contextInfo.smartSuggestions.length > 0) {
+    contextInfo.smartSuggestions.forEach((suggestion) => {
+      allVariables.push({ label: suggestion, detail: 'Suggested (based on cursor position)' });
+    });
+    // Add a separator if there are other variables to follow
+    if (Object.values(contextInfo.variables).some(arr => arr.length > 0) || contextInfo.args.length > 0) {
+        allVariables.push({ label: '──────────', kind: vscode.QuickPickItemKind.Separator });
+    }
+  }
+
   let currentContext: CodeContext | undefined = contextInfo;
   let depth = 0;
 
@@ -36,6 +47,7 @@ export async function showVariableQuickPick(contextInfo: CodeContext): Promise<v
     privateUtils.addVariablesToQuickPick(allVariables, currentContext.variables.context, 'context', scopePrefix);
     privateUtils.addVariablesToQuickPick(allVariables, currentContext.variables.reducers, 'reducers', scopePrefix);
     privateUtils.addVariablesToQuickPick(allVariables, currentContext.variables.locals, 'locals', scopePrefix);
+    privateUtils.addVariablesToQuickPick(allVariables, currentContext.variables.reduxContext, 'reduxContext', scopePrefix);
 
     currentContext = currentContext.parentContext;
     depth++;

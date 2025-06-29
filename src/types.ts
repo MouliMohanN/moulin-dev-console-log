@@ -15,5 +15,6 @@ export interface CodeContext {
   };
   insertPos: vscode.Position;
   hookBodyEndPos?: vscode.Position;
-  parentContext?: CodeContext; // Add this line
+  parentContext?: CodeContext;
+  smartSuggestions?: string[];
 }
