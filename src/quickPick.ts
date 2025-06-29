@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { CodeContext } from './types';
+import { logger } from './logger';
 
 const privateUtils = {
   getScopePrefix(depth: number, contextName: string): string {
@@ -53,8 +54,19 @@ export async function showVariableQuickPick(contextInfo: CodeContext): Promise<v
     depth++;
   }
 
-  return await vscode.window.showQuickPick(allVariables, {
+  const selectedItems = await vscode.window.showQuickPick(allVariables, {
     canPickMany: true,
     placeHolder: 'Select items to log',
   });
+
+  const updatedSelectedItems = selectedItems?.map(item => {
+    
+    return {
+      ...item,
+      label: item.label.replace(/Parent ([^:]+): /, ''), // Remove
+      
+    };
+  }) || [];
+  
+  return updatedSelectedItems;
 }

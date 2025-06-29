@@ -46,6 +46,9 @@ const privateUtils = {
     for (const typeKey in ctx.variables) {
       selectedMap[typeKey] = [];
     }
+    if (ctx.args && ctx.args.length > 0) {
+      selectedMap.args = [];
+    }
     selectedItems.forEach((item) => {
       const parts = item.split(': ');
       const type = parts.length > 1 ? parts[0].toLowerCase() : 'locals';
