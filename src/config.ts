@@ -15,6 +15,7 @@ export interface ExtensionConfig {
   enableReduxContextLogging: boolean;
   customLoggerImportStatement: string;
   sensitiveKeys: string[];
+  ignore: string[];
 }
 
 export function getConfiguration(): ExtensionConfig {
@@ -34,6 +35,7 @@ export function getConfiguration(): ExtensionConfig {
     enableReduxContextLogging: config.get<boolean>('enableReduxContextLogging', false),
     customLoggerImportStatement: config.get<string>('customLoggerImportStatement', ''),
     sensitiveKeys: config.get<string[]>('sensitiveKeys', ['password', 'token', 'secret', 'api_key']),
+    ignore: config.get<string[]>('ignore', []),
   };
 }
 

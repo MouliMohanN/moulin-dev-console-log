@@ -139,6 +139,14 @@
             "type": "string"
           },
           "description": "List of variable names to exclude from log generation."
+        },
+        "contextualConsoleLog.ignore": {
+          "type": "array",
+          "default": [],
+          "description": "An array of glob patterns for files/folders to ignore. These patterns are in addition to .eslintignore and .prettierignore.",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

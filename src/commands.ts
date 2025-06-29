@@ -36,10 +36,20 @@ const privateUtils = {
     const workspaceFolder = privateUtils.getWorkspaceFolder(uri);
     if (!workspaceFolder) { return false; }
     const relativePath = privateUtils.getRelativePath(uri);
+
+    const config = getConfiguration();
+    const ignorePatterns = config.ignore;
+
+    for (const pattern of ignorePatterns) {
+      if (privateUtils.matchesIgnorePattern(relativePath, pattern)) {
+        return true;
+      }
+    }
+
     const ignoreFiles = ['.eslintignore', '.prettierignore'];
     for (const ignoreFile of ignoreFiles) {
-      const ignorePatterns = await privateUtils.readIgnorePatterns(workspaceFolder, ignoreFile);
-      for (const pattern of ignorePatterns) {
+      const filePatterns = await privateUtils.readIgnorePatterns(workspaceFolder, ignoreFile);
+      for (const pattern of filePatterns) {
         if (privateUtils.matchesIgnorePattern(relativePath, pattern)) {
           return true;
         }
