@@ -31,6 +31,10 @@
       {
         "command": "contextualConsoleLog.toggleLogging",
         "title": "Toggle Contextual Log Insertion"
+      },
+      {
+        "command": "contextualConsoleLog.openTemplateEditor",
+        "title": "Open Log Template Editor"
       }
     ],
     "keybindings": [
@@ -164,7 +168,8 @@
       "onCommand:contextualConsoleLog.insertLog",
       "onCommand:contextualConsoleLog.wrapInConsoleLog",
       "onCommand:contextualConsoleLog.cleanLogs",
-      "onCommand:contextualConsoleLog.insertLogForFile"
+      "onCommand:contextualConsoleLog.insertLogForFile",
+      "onCommand:contextualConsoleLog.openTemplateEditor"
     ]
   },
   "scripts": {

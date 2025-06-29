@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { cleanLogsCommand, insertLogCommand, insertLogForFileCommand, wrapInConsoleLogCommand } from './commands';
 import { initLogger, logger } from './logger';
+import { openTemplateEditor } from './templateEditor';
 
 export function activate(context: vscode.ExtensionContext) {
   initLogger(true);
@@ -38,6 +39,11 @@ export function activate(context: vscode.ExtensionContext) {
     insertLogForFileCommand,
   );
 
+  const openTemplateEditorDisposable = vscode.commands.registerCommand(
+    'contextualConsoleLog.openTemplateEditor',
+    () => openTemplateEditor(context),
+  );
+
   context.subscriptions.push(
     insertLogDisposable,
     wrapInConsoleLogDisposable,
@@ -45,6 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
     insertLogForFileDisposable,
     statusBarItem,
     toggleLoggingDisposable,
+    openTemplateEditorDisposable,
   );
 }
 
