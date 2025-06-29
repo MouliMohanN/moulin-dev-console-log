@@ -47,3 +47,24 @@ context-aware log.
   - contextualConsoleLog.insertLog: The primary command for inserting contextual logs.
   - contextualConsoleLog.wrapInConsoleLog: Wraps selected text in a console.log statement.
 - Language Support: Supports JavaScript, TypeScript, and TSX/JSX files.
+
+# 3. Here's a summary of its key features:
+
+Core Features:
+
+- Insert Contextual Log: Automatically inserts a console.log statement with details about the file and function where it's placed. This can be triggered with the keybinding ctrl+shift+l.
+- Wrap Selection: Wraps a selected variable or expression in a console.log statement.
+- Clean Logs: Removes the contextual logs that were inserted by the extension.
+- File-wide Logging: Inserts contextual logs for all functions within the current file.
+- Toggle Logging: A status bar item allows you to quickly enable or disable the log insertion functionality.
+
+Customization:
+
+The extension offers a wide range of settings to customize the log output, including:
+
+- Log Template: Define a custom prefix for your log messages (e.g., [${fileName} > ${functionName}]).
+- Log Level: Use different console methods like log, warn, debug, or info.
+- Logged Items: Specify which items to include in the log, such as props, state, args, etc.
+- Custom Logger: Integrate with your own logging library instead of the standard console.
+- Development Check: Optionally wrap logs in a check to ensure they only run in a development environment.
+- Sensitive Key Exclusion: Prevent certain variables (e.g., 'password', 'token') from being logged.
