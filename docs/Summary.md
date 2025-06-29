@@ -68,3 +68,53 @@ The extension offers a wide range of settings to customize the log output, inclu
 - Custom Logger: Integrate with your own logging library instead of the standard console.
 - Development Check: Optionally wrap logs in a check to ensure they only run in a development environment.
 - Sensitive Key Exclusion: Prevent certain variables (e.g., 'password', 'token') from being logged.
+
+# 4. Core Functionality (as previously identified):
+
+- Intelligent Log Insertion:
+  - Insert Contextual `console.log`: Inserts a console.log statement with contextual information (e.g., filename, function name).
+  - Wrap in `console.log`: Wraps selected code in a console.log statement.
+  - Clean Contextual Logs: Removes logs previously inserted by the extension using a configurable logTag.
+  - Insert for File: Inserts contextual logs for an entire file, identifying functions and components.
+- Toggle Logging: Enables/disables log insertion via a status bar item.
+- Customization & Configuration: Extensive settings for log output, including logTemplate, logLevel, logFunction, logItems, addDebugger, enableClassMethodLogging, enableHookLogging,
+  logTag, wrapInDevCheck, showPreview, enableTelemetry, enableReduxContextLogging, customLoggerImportStatement, sensitiveKeys, ignore, filterUnusedVariables, and
+  enableDuplicatePrevention.
+- Keybinding: ctrl+shift+l for quick log insertion.
+
+Enhanced/Internal Features (discovered through full code review):
+
+- Advanced Code Parsing (`src/parser.ts`):
+  - Uses @babel/parser and @babel/traverse for robust AST (Abstract Syntax Tree) parsing of JavaScript/TypeScript code, including JSX.
+  - Context-Aware Logging: Identifies various code contexts:
+    - Function/Component Detection: Accurately determines function and React component boundaries.
+    - Variable Extraction: Extracts props, state, refs, context, reducers, locals, and args from the current scope.
+    - Redux/Context Logging: Specifically handles useSelector and useContext to log their values if enableReduxContextLogging is true.
+    - Class Method Logging: Extracts this.props and this.state for class components if enableClassMethodLogging is true.
+    - Hook Logging: Identifies variables within useEffect, useMemo, and useCallback dependencies if enableHookLogging is true.
+  - Smart Suggestions: Provides intelligent suggestions for variables to log based on the cursor's immediate vicinity (e.g., variables in return statements, assignment expressions, or
+    function arguments).
+  - Parent Context Linking: Can identify and link parent function/component contexts, allowing for logging of variables from outer scopes.
+  - Unused Variable Filtering: Filters out variables that are not referenced in the code if filterUnusedVariables is true.
+  - Sensitive Key Filtering: Prevents logging of variables matching a configurable list of sensitiveKeys (e.g., password, token).
+- Intelligent Log Generation (`src/logGenerator.ts`):
+  - Dynamically constructs console.log statements based on the extracted code context and user configurations.
+  - Handles different log levels (log, warn, debug, info, customMethod).
+  - Supports custom log functions (e.g., myLogger.log instead of console.log).
+  - Can wrap logs in if (process.env.NODE_ENV !== 'production') checks.
+  - Inserts debugger; statements if configured.
+- User Interaction (`src/quickPick.ts`):
+  - Presents a Quick Pick menu to the user, allowing them to select specific variables to include in the log statement. This includes variables from the current scope and parent scopes.
+- File System & Ignore Patterns (`src/commands.ts`):
+  - Respects .eslintignore and .prettierignore files, as well as a custom ignore setting, to prevent log insertion in ignored files.
+  - Handles adding custom logger import statements at the top of the file if configured.
+- Preview Mode (`src/commands.ts`):
+  - Offers a preview of the changes before applying them, using VS Code's built-in diff view, if showPreview is enabled.
+- Duplicate Log Prevention (`src/commands.ts`):
+  - Intelligently checks for and skips the insertion of duplicate log statements if enableDuplicatePrevention is true.
+- Robust Logging & Telemetry (`src/logger.ts`):
+  - Provides internal logging for the extension's operations (info, log, warn, error) to an output channel.
+  - Includes a placeholder for telemetry reporting (though currently commented out, it indicates an intention for anonymous usage data collection if enableTelemetry is true).
+
+In essence, the extension is far more sophisticated than just a simple log inserter. It performs deep code analysis to provide highly contextual and customizable logging, aiming to
+streamline the debugging workflow for developers.
