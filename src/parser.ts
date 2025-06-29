@@ -35,20 +35,25 @@ const privateUtils = {
     traverse(ast, {
       enter(path) {
         const node = path.node;
-        if (!node.loc) { return; }
+        if (!node.loc) {
+          return;
+        }
         if (privateUtils.isFunctionNode(node)) {
           const name = privateUtils.getFunctionName(node, path);
           let isComponent = privateUtils.detectComponent(path);
           const variables: VariableBuckets = privateUtils.createEmptyVariableBuckets();
           let args: string[] = privateUtils.extractArgs(node);
-          if (isComponent) { variables.props = args; }
+          if (isComponent) {
+            variables.props = args;
+          }
           const newContext: CodeContext = {
             type: isComponent ? 'react' : 'function',
             name,
             args,
             insertPos: new vscode.Position(0, 0),
             variables: { ...variables },
-            parentContext: functionContextStack.length > 0 ? functionContextStack[functionContextStack.length - 1] : undefined,
+            parentContext:
+              functionContextStack.length > 0 ? functionContextStack[functionContextStack.length - 1] : undefined,
           };
           if (enableClassMethodLogging && t.isClassMethod(node)) {
             privateUtils.collectClassMethodVars(node, newContext);
@@ -57,7 +62,14 @@ const privateUtils = {
             ((node as any).body.body as t.Statement[]).forEach((bodyNode: t.Statement) => {
               if (t.isVariableDeclaration(bodyNode)) {
                 bodyNode.declarations.forEach((declaration) => {
-                  privateUtils.collectVariableDeclaration(declaration, newContext, doc, config, enableHookLogging, enableReduxContextLogging);
+                  privateUtils.collectVariableDeclaration(
+                    declaration,
+                    newContext,
+                    doc,
+                    config,
+                    enableHookLogging,
+                    enableReduxContextLogging,
+                  );
                 });
               }
             });
@@ -89,18 +101,34 @@ const privateUtils = {
   },
 
   isFunctionNode(node: t.Node): boolean {
-    return t.isFunctionDeclaration(node) || t.isArrowFunctionExpression(node) || t.isFunctionExpression(node) || t.isClassMethod(node);
+    return (
+      t.isFunctionDeclaration(node) ||
+      t.isArrowFunctionExpression(node) ||
+      t.isFunctionExpression(node) ||
+      t.isClassMethod(node)
+    );
   },
 
   getFunctionName(node: any, path: any): string {
-    return node.id?.name || node.key?.name || (path.parent.type === 'VariableDeclarator' && path.parent.id?.name) || 'anonymous';
+    return (
+      node.id?.name ||
+      node.key?.name ||
+      (path.parent.type === 'VariableDeclarator' && path.parent.id?.name) ||
+      'anonymous'
+    );
   },
 
   detectComponent(path: any): boolean {
     let isComponent = false;
     path.traverse({
-      JSXElement() { isComponent = true; path.stop(); },
-      JSXFragment() { isComponent = true; path.stop(); },
+      JSXElement() {
+        isComponent = true;
+        path.stop();
+      },
+      JSXFragment() {
+        isComponent = true;
+        path.stop();
+      },
     });
     return isComponent;
   },
@@ -145,10 +173,19 @@ const privateUtils = {
     );
   },
 
-  collectVariableDeclaration(declaration: any, newContext: CodeContext, doc: vscode.TextDocument, config: any, enableHookLogging: boolean, enableReduxContextLogging: boolean) {
+  collectVariableDeclaration(
+    declaration: any,
+    newContext: CodeContext,
+    doc: vscode.TextDocument,
+    config: any,
+    enableHookLogging: boolean,
+    enableReduxContextLogging: boolean,
+  ) {
     const id = declaration.id;
     const init = declaration.init;
-    if (!t.isIdentifier(id) && !t.isArrayPattern(id) && !t.isObjectPattern(id)) { return; }
+    if (!t.isIdentifier(id) && !t.isArrayPattern(id) && !t.isObjectPattern(id)) {
+      return;
+    }
     const names = privateUtils.extractVariableNames(id);
     if (t.isCallExpression(init)) {
       const callee = (init.callee as any).name || (init.callee as any).property?.name;

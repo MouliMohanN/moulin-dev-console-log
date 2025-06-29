@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { getConfiguration } from './config';
-import { info } from 'console';
 
 let useOutputChannel = false;
 let outputChannel: vscode.OutputChannel | null = null;
@@ -10,10 +9,14 @@ type LogLevel = 'info' | 'log' | 'warn' | 'error';
 const privateUtils = {
   getVsCodeMessageFunction(level: LogLevel): ((message: string) => Thenable<void>) | null {
     switch (level) {
-      case 'info':  return vscode.window.showInformationMessage;
-      case 'warn':  return vscode.window.showWarningMessage;
-      case 'error': return vscode.window.showErrorMessage;
-      default:      return null;
+      case 'info':
+        return vscode.window.showInformationMessage;
+      case 'warn':
+        return vscode.window.showWarningMessage;
+      case 'error':
+        return vscode.window.showErrorMessage;
+      default:
+        return null;
     }
   },
 
@@ -39,7 +42,7 @@ const privateUtils = {
       // In a real extension, you would use TelemetryReporter here.
       // For example: telemetryReporter.sendTelemetryErrorEvent('error', properties, { message: error.message });
     }
-  }
+  },
 };
 
 export function initLogger(useOutput: boolean, channelName = 'contextualConsoleLog.insertLog') {
@@ -54,7 +57,8 @@ export const logger = {
   log: (message: string, data?: any) => privateUtils.writeLog('log', message, data),
   warn: (message: string, data?: any) => privateUtils.writeLog('warn', message, data),
   error: (message: string, data?: any) => privateUtils.writeLog('error', message, data),
-  sendError: (error: Error, properties?: { [key: string]: string }) => privateUtils.sendTelemetryError(error, properties),
+  sendError: (error: Error, properties?: { [key: string]: string }) =>
+    privateUtils.sendTelemetryError(error, properties),
   dispose: () => outputChannel?.dispose(),
   clear: () => outputChannel?.clear(),
 };

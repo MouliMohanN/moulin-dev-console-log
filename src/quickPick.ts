@@ -5,7 +5,12 @@ const privateUtils = {
   getScopePrefix(depth: number, contextName: string): string {
     return depth === 0 ? '' : `Parent (${contextName}): `;
   },
-  addVariablesToQuickPick(allVariables: vscode.QuickPickItem[], variableArray: string[], typeLabel: string, scopePrefix: string) {
+  addVariablesToQuickPick(
+    allVariables: vscode.QuickPickItem[],
+    variableArray: string[],
+    typeLabel: string,
+    scopePrefix: string,
+  ) {
     variableArray.forEach((name: string) => {
       allVariables.push({ label: `${scopePrefix}${typeLabel}: ${name}`, detail: typeLabel });
     });

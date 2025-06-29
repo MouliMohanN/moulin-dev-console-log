@@ -2,7 +2,13 @@ import { getConfiguration } from './config';
 import { CodeContext } from './types';
 
 const privateUtils = {
-  addVariables(variables: { [key: string]: string[] }, logItemsConfig: string[], context: CodeContext, parts: string[], prefix: string = '') {
+  addVariables(
+    variables: { [key: string]: string[] },
+    logItemsConfig: string[],
+    context: CodeContext,
+    parts: string[],
+    prefix: string = '',
+  ) {
     for (const key in variables) {
       if (logItemsConfig.includes(key) && variables[key].length) {
         if (key === 'refs') {
@@ -29,7 +35,9 @@ const privateUtils = {
     const parts: string[] = [];
     privateUtils.addVariables(context.variables, logItemsConfig, context, parts);
     const parent = privateUtils.buildParentLogObject(context, logItemsConfig);
-    if (parent) { parts.push(parent); }
+    if (parent) {
+      parts.push(parent);
+    }
     return `{ ${parts.join(', ')} }`;
   },
 
@@ -74,7 +82,15 @@ const privateUtils = {
     return parts.length > 0 ? `{ ${parts.join(', ')} }` : '';
   },
 
-  formatLogLine(logFunction: string, logLevel: string, prefix: string, logObject: string, wrapInDevCheck: boolean, logTag: string, addDebugger: boolean): string {
+  formatLogLine(
+    logFunction: string,
+    logLevel: string,
+    prefix: string,
+    logObject: string,
+    wrapInDevCheck: boolean,
+    logTag: string,
+    addDebugger: boolean,
+  ): string {
     let logLine = `${logFunction}.${logLevel}('${prefix}', ${logObject});`;
     if (wrapInDevCheck) {
       logLine = `if (process.env.NODE_ENV !== 'production') {\n  ${logLine}\n}`;
@@ -86,7 +102,7 @@ const privateUtils = {
       logLine = `debugger;\n${logLine}`;
     }
     return logLine;
-  }
+  },
 };
 
 export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedItems?: string[]): string {
