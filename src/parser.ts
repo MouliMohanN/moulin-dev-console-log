@@ -53,14 +53,15 @@ const privateUtils = {
               functionContextStack.length > 0 ? functionContextStack[functionContextStack.length - 1] : undefined,
           };
           if (enableClassMethodLogging && t.isClassMethod(node)) {
-            collectClassMethodVars(node, newContext);
+            collectClassMethodVars(node, newContext, path);
           }
           if (t.isBlockStatement((node as any).body)) {
             ((node as any).body.body as t.Statement[]).forEach((bodyNode: t.Statement) => {
               if (t.isVariableDeclaration(bodyNode)) {
                 bodyNode.declarations.forEach((declaration) => {
                   collectVariableDeclaration(
-                    declaration,
+                    declaration.id,
+                    declaration.init,
                     newContext,
                     doc,
                     config,

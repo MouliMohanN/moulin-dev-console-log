@@ -20,7 +20,7 @@ export function extractArgs(node: any): string[] {
   return args;
 }
 
-export function collectClassMethodVars(node: any, newContext: CodeContext) {
+export function collectClassMethodVars(node: any, newContext: CodeContext, path: any) {
   traverse(
     node,
     {
@@ -38,22 +38,20 @@ export function collectClassMethodVars(node: any, newContext: CodeContext) {
         }
       },
     },
-    undefined,
-    undefined,
-    undefined,
+    path.scope,
+    path,
   );
 }
 
 export function collectVariableDeclaration(
-  declaration: any,
+  id: any,
+  init: any,
   newContext: CodeContext,
   doc: vscode.TextDocument,
   config: any,
   enableHookLogging: boolean,
   enableReduxContextLogging: boolean,
 ) {
-  const id = declaration.id;
-  const init = declaration.init;
   if (!t.isIdentifier(id) && !t.isArrayPattern(id) && !t.isObjectPattern(id)) {
     return;
   }
