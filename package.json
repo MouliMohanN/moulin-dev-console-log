@@ -9,6 +9,7 @@
   "categories": [
     "Other"
   ],
+  "activationEvents": ["*"],
   "main": "./dist/activate.js",
   "contributes": {
     "commands": [
@@ -56,7 +57,12 @@
         "contextualConsoleLog.logTemplate": {
           "type": "string",
           "default": "[${fileName} > ${functionName}]",
-          "description": "Custom template for the log message prefix. Available variables: ${fileName}, ${functionName}."
+          "description": "Custom template for the log message prefix. Available variables: ${fileName}, ${functionName}, ${lineNumber}."
+        },
+        "contextualConsoleLog.includeLineNumber": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include the line number in the log message."
         },
         "contextualConsoleLog.logLevel": {
           "type": "string",

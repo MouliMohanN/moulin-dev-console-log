@@ -20,7 +20,9 @@ suite('Config Test Suite', () => {
                             case 'logFunction': return 'console';
                             case 'enableClassMethodLogging': return false;
                             case 'enableHookLogging': return false;                            case 'logTag': return '// LOG';
-                            case 'wrapInDevCheck': return true;                            case 'showPreview': return false;                            case 'enableTelemetry': return false;                            case 'enableContextLogging': return false;                            case 'enableReduxContextLogging': return false;                            case 'customLoggerImportStatement': return '';                            case 'sensitiveKeys': return ['secret'];                            case 'ignore': return [];                            case 'filterUnusedVariables': return false;                            case 'enableDuplicatePrevention': return false;                            default: return defaultValue;                        }
+                            case 'wrapInDevCheck': return true;                            case 'showPreview': return false;                            case 'enableTelemetry': return false;                            case 'enableContextLogging': return false;                            case 'enableReduxContextLogging': return false;                            case 'customLoggerImportStatement': return '';                            case 'sensitiveKeys': return ['secret'];                            case 'ignore': return [];                            case 'filterUnusedVariables': return false;                            case 'enableDuplicatePrevention': return false;
+                            case 'includeLineNumber': return false;
+                            default: return defaultValue;                        }
                     }
                 } as any;            }
             return originalGetConfiguration(section);        };
@@ -51,6 +53,7 @@ suite('Config Test Suite', () => {
         assert.deepStrictEqual(config.ignore, []);
         assert.strictEqual(config.filterUnusedVariables, false);
         assert.strictEqual(config.enableDuplicatePrevention, false);
+        assert.strictEqual(config.includeLineNumber, false);
     });
 
     test('setConfiguration should override values', () => {
@@ -73,6 +76,7 @@ suite('Config Test Suite', () => {
             ignore: ['*.log'],
             filterUnusedVariables: true,
             enableDuplicatePrevention: true,
+            includeLineNumber: true,
         }));
 
         const config = getConfiguration();
@@ -94,6 +98,7 @@ suite('Config Test Suite', () => {
         assert.deepStrictEqual(config.ignore, ['*.log']);
         assert.strictEqual(config.filterUnusedVariables, true);
         assert.strictEqual(config.enableDuplicatePrevention, true);
+        assert.strictEqual(config.includeLineNumber, true);
     });
 
     test('resetConfiguration should restore default values', () => {
@@ -116,6 +121,7 @@ suite('Config Test Suite', () => {
             ignore: [],
             filterUnusedVariables: false,
             enableDuplicatePrevention: false,
+            includeLineNumber: false,
         }));
 
         resetConfiguration();
@@ -123,5 +129,6 @@ suite('Config Test Suite', () => {
         assert.strictEqual(config.logTemplate, '[${fileName}]');
         assert.strictEqual(config.logLevel, 'debug');
         assert.deepStrictEqual(config.logItems, ['locals']);
+        assert.strictEqual(config.includeLineNumber, false);
     });
 });

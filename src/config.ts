@@ -19,6 +19,7 @@ export interface ExtensionConfig {
   ignore: string[];
   filterUnusedVariables: boolean;
   enableDuplicatePrevention: boolean;
+  includeLineNumber: boolean;
 }
 
 export let getConfiguration: () => ExtensionConfig;
@@ -45,6 +46,7 @@ let defaultGetConfiguration = (): ExtensionConfig => {
     ignore: config.get<string[]>('ignore', []),
     filterUnusedVariables: config.get<boolean>('filterUnusedVariables', true),
     enableDuplicatePrevention: config.get<boolean>('enableDuplicatePrevention', true),
+    includeLineNumber: config.get<boolean>('includeLineNumber', false),
   };
 };
 

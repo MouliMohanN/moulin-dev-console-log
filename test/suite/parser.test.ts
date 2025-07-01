@@ -61,6 +61,7 @@ suite('Parser Test Suite', () => {
             ignore: [],
             filterUnusedVariables: true,
             enableDuplicatePrevention: true,
+            includeLineNumber: false,
             ...initialConfig // Ensure initialConfig values take precedence
         }));
     }

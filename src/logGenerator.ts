@@ -7,8 +7,11 @@ import { formatLogLine } from './logGenerator/logFormatter';
 
 export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedItems?: string[]): string {
   const config = getConfiguration();
-  const { logTemplate, logLevel, addDebugger, logItems, logFunction, logTag, wrapInDevCheck } = config;
-  const prefix = logTemplate.replace('${fileName}', fileName).replace('${functionName}', ctx.name);
+  const { logTemplate, logLevel, addDebugger, logItems, logFunction, logTag, wrapInDevCheck, includeLineNumber } = config;
+  let prefix = logTemplate.replace('${fileName}', fileName).replace('${functionName}', ctx.name);
+  if (includeLineNumber) {
+    prefix = prefix.replace('${lineNumber}', ctx.insertPos.line.toString());
+  }
   let logObject: string = '';
   if (selectedItems && selectedItems.length > 0) {
     const selectedMap = createSelectedMap(ctx, selectedItems);
