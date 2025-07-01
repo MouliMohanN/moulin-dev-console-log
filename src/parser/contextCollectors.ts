@@ -73,7 +73,11 @@ export function collectVariableDeclaration(
         names.forEach((n) => newContext.variables.refs.push(n));
         break;
       case 'useContext':
-        names.forEach((n) => newContext.variables.context.push(n));
+        if (enableReduxContextLogging) {
+          names.forEach((n) => newContext.variables.reduxContext.push(n));
+        } else if (init.arguments.length > 0) {
+          names.forEach((n) => newContext.variables.context.push(n));
+        }
         break;
       case 'useReducer':
         if (names.length >= 2) {
@@ -81,30 +85,8 @@ export function collectVariableDeclaration(
         }
         break;
       case 'useSelector':
-      case 'useContext':
-        if (enableReduxContextLogging && init.arguments.length > 0) {
-          const arg = init.arguments[0];
-          if (t.isIdentifier(arg)) {
-            newContext.variables.reduxContext.push(arg.name);
-          } else if (t.isMemberExpression(arg) && t.isIdentifier(arg.property) && arg.loc) {
-            newContext.variables.reduxContext.push(
-              doc.getText(
-                new vscode.Range(
-                  new vscode.Position(arg.loc.start.line - 1, arg.loc.start.column),
-                  new vscode.Position(arg.loc.end.line - 1, arg.loc.end.column),
-                ),
-              ),
-            );
-          } else if (t.isCallExpression(arg) && t.isIdentifier(arg.callee) && arg.loc) {
-            newContext.variables.reduxContext.push(
-              doc.getText(
-                new vscode.Range(
-                  new vscode.Position(arg.loc.start.line - 1, arg.loc.start.column),
-                  new vscode.Position(arg.loc.end.line - 1, arg.loc.end.column),
-                ),
-              ),
-            );
-          }
+        if (enableReduxContextLogging) {
+          names.forEach((n) => newContext.variables.reduxContext.push(n));
         }
         break;
       case 'useCallback':

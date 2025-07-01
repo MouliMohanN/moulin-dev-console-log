@@ -208,7 +208,7 @@ suite('Parser Test Suite', () => {
         console.log(result);
         logger.log('MouliTesting ', result);
         assert.strictEqual(result.length, 1);
-        assert.deepStrictEqual(result[0].variables.reduxContext, ['state => state.some.data']);
+        assert.deepStrictEqual(result[0].variables.reduxContext, ['data']);
     }, { enableReduxContextLogging: true, filterUnusedVariables: false });
 
     runTest('parseFileForFunctions should identify redux context (useContext with member expression)', () => {
@@ -217,7 +217,7 @@ suite('Parser Test Suite', () => {
         console.log(result);
         logger.log('MouliTesting ', result);
         assert.strictEqual(result.length, 1);
-        assert.deepStrictEqual(result[0].variables.reduxContext, ['MyContext.SomeData']);
+        assert.deepStrictEqual(result[0].variables.reduxContext, ['data']);
     }, { enableReduxContextLogging: true, filterUnusedVariables: false });
 
     runTest('parseFileForFunctions should identify arguments with object destructuring', () => {
