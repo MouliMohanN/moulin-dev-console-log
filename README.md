@@ -1,71 +1,105 @@
-# moulin-dev-console-log README
+# Contextual Console Log
 
-This is the README for your extension "moulin-dev-console-log". After writing up a brief description, we recommend including the following sections.
+Debugging is a core part of development, but manually writing `console.log` statements is tedious and error-prone. You have to find the right place to log, figure out which variables are in scope, and then clean them all up afterward. This extension automates that entire process.
+
+Contextual Console Log is a powerful VS Code tool that acts as your debugging assistant. It intelligently analyzes your code in real-time to generate highly relevant and informative log statements exactly where you need them. Whether you're working with simple functions, complex React components, or legacy class-based code, this extension provides the context you need to find and fix bugs faster.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Deep Contextual Analysis**: This is the core of the extension. It doesn't just find variables; it understands your code's structure using Abstract Syntax Trees (ASTs). It knows the difference between a function's arguments, a React component's props, state variables from the `useState` hook, and refs from `useRef`. This deep analysis results in logs that are incredibly insightful.
 
-For example if there is an image subfolder under your extension project workspace:
+- **Smart Suggestions**: The extension is intelligent about which variables to log. It analyzes the code at your cursor's position and provides suggestions for the most relevant variables. For example, it will prioritize variables found within a `return` statement or in the same line of code, assuming those are the most likely candidates for debugging.
 
-\!\[feature X\]\(images/feature-x.png\)
+- **Intelligent Log Generation**: The extension automatically formats logs to be as readable as possible. It includes the filename and the name of the function or component, so you always know the exact origin of a log message in your console.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- **React and Hooks Support**: Built with modern web development in mind, it has first-class support for React. It correctly identifies and logs props, state, refs, context from `useContext`, and state/dispatch from `useReducer`. It's also smart enough to log the `.current` value of a ref and to ignore `setState` functions.
 
-## Requirements
+- **Full Customization**: Every developer and team has their own style. The extension is highly configurable, allowing you to control everything from the log message prefix to the logging function itself. You can make it work with your existing logger (like MyLogger or AppLogger) and enforce a consistent style across your project.
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- **Effortless Cleanup**: Forget hunting for `console.log` statements before a commit. The extension can tag every log it creates with a unique comment. A single command, `Clean Logs`, will then instantly remove all of these tagged logs from a file, ensuring your production code stays clean.
 
-## Extension Settings
+- **Bulk Logging**: When you're new to a file or trying to understand a complex flow, you can use the `Insert Logs for File` command to automatically inject a contextual log into every function and component in the file, giving you a complete execution trace.
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+## Usage Examples
 
-For example:
+### Your First Log: A Simple Function
 
-This extension contributes the following settings:
+This shows the basic functionality of inserting a log into a standard JavaScript function.
 
-- `myExtension.enable`: Enable/disable this extension.
-- `myExtension.thing`: Set to `blah` to do something.
+- **Scenario**: You want to see the values of the arguments and local variables inside `calculateTotal`.
+- **Action**: Place your cursor inside the function and press `ctrl+shift+l`.
 
-## Known Issues
+- **Before**:
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+  ```javascript
+  function calculateTotal(price, quantity) {
+    const tax = 0.08;
+    // Cursor is here
+    return price * quantity * (1 + tax);
+  }
+  ```
 
-## Release Notes
+- **After**:
+  ```javascript
+  function calculateTotal(price, quantity) {
+    const tax = 0.08;
+    console.log('[script.js > calculateTotal]', { price, quantity, tax });
+    return price * quantity * (1 + tax);
+  }
+  ```
 
-Users appreciate release notes as you update your extension.
+### Advanced Usage: A React Component
 
-### 1.0.0
+Here, the extension demonstrates its understanding of React-specific hooks and props.
 
-Initial release of ...
+- **Scenario**: You need to debug a `UserProfile` component and want to inspect its props and internal state.
+- **Action**: Place your cursor inside the component and trigger the `Insert Contextual Log` command.
 
-### 1.0.1
+- **Before**:
 
-Fixed issue #.
+  ```jsx
+  function UserProfile({ user }) {
+    const [isActive, setIsActive] = useState(true);
+    const profileRef = useRef(null);
+    // Cursor is here
+    return <div ref={profileRef}>{user.name}</div>;
+  }
+  ```
 
-### 1.1.0
+- **After**:
+  ```jsx
+  function UserProfile({ user }) {
+    const [isActive, setIsActive] = useState(true);
+    const profileRef = useRef(null);
+    console.log('[UserProfile.jsx > UserProfile]', {
+      props: { user },
+      state: { isActive },
+      refs: { profileRef: profileRef.current },
+    });
+    return <div ref={profileRef}>{user.name}</div>;
+  }
+  ```
 
-Added features X, Y, and Z.
+## Configuration
 
----
+Customize the extension by editing the VS Code settings (`settings.json`). Below is a complete list of all available options.
 
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-- [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-- Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-- Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-- Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-- [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-- [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+| Setting                                            | Description                                                                                                                                                  | Default Value                                                 |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
+| `contextualConsoleLog.logTemplate`                 | A template string for the log message prefix. Available variables: `${fileName}`, `${functionName}`.                                                         | `"[${fileName} > ${functionName}]"`                           |
+| `contextualConsoleLog.logLevel`                    | The console method to use (e.g., `log`, `warn`, `debug`, `info`).                                                                                            | `"log"`                                                       |
+| `contextualConsoleLog.logFunction`                 | The logging object to call. Change this to use a custom logger like `MyLogger` or `AppLogger`.                                                               | `"console"`                                                   |
+| `contextualConsoleLog.logItems`                    | An array of context items to automatically include in the log suggestions.                                                                                   | `["props", "state", "refs", "context", "reducers", "locals"]` |
+| `contextualConsoleLog.addDebugger`                 | If true, inserts a `debugger;` statement before the log line for breakpoint debugging.                                                                       | `false`                                                       |
+| `contextualConsoleLog.wrapInDevCheck`              | If true, wraps the log statement in an environment check (`if (process.env.NODE_ENV !== 'production') { ... }`).                                             | `false`                                                       |
+| `contextualConsoleLog.logTag`                      | A comment tag to append to logs (e.g., `// @ccl-log`). This enables the `Clean Logs` command to find and remove them.                                        | `""`                                                          |
+| `contextualConsoleLog.customLoggerImportStatement` | If you use a custom logger, specify the import statement here (e.g., `"import logger from '@/utils/logger';"`). It will be added to the file if not present. | `""`                                                          |
+| `contextualConsoleLog.sensitiveKeys`               | An array of variable names to automatically exclude from logs to prevent leaking sensitive data.                                                             | `["password", "token", "secret", "api_key"]`                  |
+| `contextualConsoleLog.enableClassMethodLogging`    | Set to `true` to enable logging inside class component methods (e.g., `this.props`, `this.state`).                                                           | `true`                                                        |
+| `contextualConsoleLog.enableHookLogging`           | Set to `true` to enable logging for variables within React hooks like `useEffect`, `useMemo`, and `useCallback`.                                             | `true`                                                        |
+| `contextualConsoleLog.enableReduxContextLogging`   | Set to `true` to enable logging for Redux/Context stores (e.g., `useSelector`, `useContext`).                                                                | `false`                                                       |
+| `contextualConsoleLog.showPreview`                 | If true, shows a diff preview of the changes before inserting the log statement.                                                                             | `false`                                                       |
+| `contextualConsoleLog.ignore`                      | An array of glob patterns for files/folders to ignore. This is in addition to `.eslintignore` and `.prettierignore`.                                         | `[]`                                                          |
+| `contextualConsoleLog.filterUnusedVariables`       | If true, filters out unused variables from the log suggestions to reduce clutter.                                                                            | `true`                                                        |
+| `contextualConsoleLog.enableDuplicatePrevention`   | If true, prevents the extension from inserting a log statement if a similar one already exists.                                                              | `true`                                                        |
+| `contextualConsoleLog.enableTelemetry`             | Enable anonymous telemetry to help improve the extension.                                                                                                    | `true`                                                        |
