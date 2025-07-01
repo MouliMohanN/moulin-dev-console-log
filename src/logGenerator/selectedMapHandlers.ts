@@ -1,13 +1,17 @@
 import { CodeContext } from '../types';
+import { logger } from '../../test/logger';
 
 export function createSelectedMap(ctx: CodeContext, selectedItems: string[]): { [key: string]: string[] } {
   const selectedMap: { [key: string]: string[] } = {};
+  logger.log('Initial selectedMap:', selectedMap);
   for (const typeKey in ctx.variables) {
     selectedMap[typeKey] = [];
   }
+  logger.log('selectedMap after ctx.variables initialization:', selectedMap);
   if (ctx.args && ctx.args.length > 0) {
     selectedMap.args = [];
   }
+  logger.log('selectedMap after ctx.args initialization:', selectedMap);
   selectedItems.forEach((item) => {
     const parts = item.split(': ');
     const type = parts.length > 1 ? parts[0].toLowerCase() : 'locals';
@@ -21,6 +25,7 @@ export function createSelectedMap(ctx: CodeContext, selectedItems: string[]): { 
       selectedMap[type].push(name);
     }
   });
+  logger.log('Final selectedMap:', selectedMap);
   return selectedMap;
 }
 

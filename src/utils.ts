@@ -32,7 +32,20 @@ export function extractVariableNames(id: any): string[] {
     return [id.name];
   }
   if (Array.isArray(id.elements)) {
-    return id.elements.map((el: any) => el?.name).filter(Boolean);
+    const names: string[] = [];
+    id.elements.forEach((el: any) => {
+      names.push(...extractVariableNames(el));
+    });
+    return names;
+  }
+  if (id.type === 'ObjectPattern' && Array.isArray(id.properties)) {
+    const names: string[] = [];
+    id.properties.forEach((prop: any) => {
+      if (prop.type === 'ObjectProperty' && prop.value) {
+        names.push(...extractVariableNames(prop.value));
+      }
+    });
+    return names;
   }
   return [];
 }
