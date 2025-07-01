@@ -11,7 +11,7 @@ export function findReturnInsertPosition(node: t.Function, doc: vscode.TextDocum
   const body = (node.body as any).body || [];
   for (let stmt of body) {
     if (stmt.type === 'ReturnStatement' && stmt.loc) {
-      return new vscode.Position(stmt.loc.start.line - 1, stmt.loc.start.column);
+      return new vscode.Position(stmt.loc.end.line - 1, stmt.loc.end.column);
     }
   }
 

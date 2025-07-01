@@ -1,0 +1,7 @@
+feat: Improve parser test coverage and refactor utilities
+
+- Integrated nyc for code coverage reporting.
+- Refactored filterSensitiveKeys to correctly filter arguments in CodeContext.
+- Refactored getSmartSuggestionsAtCursor to collect all local variables within function scope.
+- Added new test cases for filterSensitiveKeys, getSmartSuggestionsAtCursor, findReturnInsertPosition, and isFunctionNode to improve test coverage.
+- Updated relevant type definitions and imports across the codebase.

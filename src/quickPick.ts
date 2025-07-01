@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { CodeContext } from './types';
+import { CodeContext, VariableBuckets } from './types';
 
 const privateUtils = {
   getScopePrefix(depth: number, contextName: string): string {
@@ -21,12 +21,17 @@ export async function showVariableQuickPick(contextInfo: CodeContext): Promise<v
   const allVariables: vscode.QuickPickItem[] = [];
 
   // Add smart suggestions first
-  if (contextInfo.smartSuggestions && contextInfo.smartSuggestions.length > 0) {
-    contextInfo.smartSuggestions.forEach((suggestion) => {
-      allVariables.push({ label: suggestion, detail: 'Suggested (based on cursor position)' });
-    });
+  if (contextInfo.smartSuggestions) {
+    let hasSmartSuggestions = false;
+    for (const key in contextInfo.smartSuggestions) {
+      const bucket = contextInfo.smartSuggestions[key as keyof VariableBuckets];
+      if (bucket && bucket.length > 0) {
+        hasSmartSuggestions = true;
+        privateUtils.addVariablesToQuickPick(allVariables, bucket, key, 'Suggested (based on cursor position): ');
+      }
+    }
     // Add a separator if there are other variables to follow
-    if (Object.values(contextInfo.variables).some((arr) => arr.length > 0) || contextInfo.args.length > 0) {
+    if (hasSmartSuggestions && (Object.values(contextInfo.variables).some((arr) => arr.length > 0) || contextInfo.args.length > 0)) {
       allVariables.push({ label: '──────────', kind: vscode.QuickPickItemKind.Separator });
     }
   }

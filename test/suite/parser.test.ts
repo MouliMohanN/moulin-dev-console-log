@@ -250,4 +250,43 @@ suite('Parser Test Suite', () => {
         assert.strictEqual(result[1].name, 'inner');
         assert.strictEqual(result[1].parentContext?.name, 'outer');
     }, {});
+
+    runTest('parseFileForFunctions should filter sensitive keys', () => {
+        mockCode = `function myFunction(password, token, username) {\n  console.log(password, token, username);\n}`;
+        const result = parseFileForFunctions(mockCode, doc);
+        assert.strictEqual(result.length, 1);
+        assert.deepStrictEqual(result[0].args, ['username']);
+    }, { sensitiveKeys: ['password', 'token'], filterUnusedVariables: false });
+
+    runTest('parseCodeContextAtCursor should return smart suggestions', () => {
+        mockCode = `function myFunction(a, b) {\n  const c = 1;\n  const d = 2;\n}`;
+        const position = new vscode.Position(1, 10); // Inside myFunction
+        const result = parseCodeContextAtCursor(mockCode, position, doc);
+        assert.notStrictEqual(result, null);
+        assert.notStrictEqual(result?.smartSuggestions, undefined);
+        assert.deepStrictEqual(result?.smartSuggestions?.locals, ['a', 'b', 'c', 'd']);
+    }, {});
+
+    runTest('parseFileForFunctions should correctly identify insert position with return statement', () => {
+        mockCode = `function myFunction() {\n  return 1;\n}`;
+        const result = parseFileForFunctions(mockCode, doc);
+        assert.strictEqual(result.length, 1);
+        assert.deepStrictEqual(result[0].insertPos, new vscode.Position(1, 11)); // After 'return 1;'
+    }, {});
+
+    runTest('isFunctionNode should identify arrow function in variable declaration', () => {
+        mockCode = `const myFunction = () => {};`;
+        const result = parseFileForFunctions(mockCode, doc);
+        assert.strictEqual(result.length, 1);
+        assert.strictEqual(result[0].name, 'myFunction');
+    }, {});
+
+    runTest('isFunctionNode should identify function expression in variable declaration', () => {
+        mockCode = `const myFunction = function() {};`;
+        const result = parseFileForFunctions(mockCode, doc);
+        assert.strictEqual(result.length, 1);
+        assert.strictEqual(result[0].name, 'myFunction');
+    }, {});
 });
+
+    

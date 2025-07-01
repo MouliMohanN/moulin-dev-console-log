@@ -1,4 +1,4 @@
-import { VariableBuckets } from '../types';
+import { VariableBuckets, CodeContext } from '../types';
 
 export function filterUnusedVariables(variables: VariableBuckets, scope: any) {
   filterVariables(variables, (name: string) => {
@@ -7,8 +7,9 @@ export function filterUnusedVariables(variables: VariableBuckets, scope: any) {
   });
 }
 
-export function filterSensitiveKeys(variables: VariableBuckets, sensitiveKeys: string[]) {
-  filterVariables(variables, (name: string) => !sensitiveKeys.includes(name));
+export function filterSensitiveKeys(context: CodeContext, sensitiveKeys: string[]) {
+  filterVariables(context.variables, (name: string) => !sensitiveKeys.includes(name));
+  context.args = context.args.filter((name: string) => !sensitiveKeys.includes(name));
 }
 
 function filterVariables(variables: VariableBuckets, predicate: (name: string) => boolean) {

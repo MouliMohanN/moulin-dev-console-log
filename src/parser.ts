@@ -77,9 +77,9 @@ const privateUtils = {
           if (config.filterUnusedVariables) {
             filterUnusedVariables(newContext.variables, path.scope);
           }
-          filterSensitiveKeys(newContext.variables, config.sensitiveKeys);
+          filterSensitiveKeys(newContext, config.sensitiveKeys);
           if (cursor && positionIn(node.loc, cursor, doc)) {
-            newContext.smartSuggestions = getSmartSuggestionsAtCursor(ast, cursor, doc);
+            newContext.smartSuggestions = getSmartSuggestionsAtCursor(ast, cursor, doc, path.scope);
             cursorFunctionContext = newContext;
           }
           allFunctionContexts.push(newContext);
