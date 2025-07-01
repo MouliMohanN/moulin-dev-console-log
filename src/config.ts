@@ -20,6 +20,7 @@ export interface ExtensionConfig {
   filterUnusedVariables: boolean;
   enableDuplicatePrevention: boolean;
   includeLineNumber: boolean;
+  enableSmartSuggestions: boolean;
 }
 
 export let getConfiguration: () => ExtensionConfig;
@@ -47,6 +48,7 @@ let defaultGetConfiguration = (): ExtensionConfig => {
     filterUnusedVariables: config.get<boolean>('filterUnusedVariables', true),
     enableDuplicatePrevention: config.get<boolean>('enableDuplicatePrevention', true),
     includeLineNumber: config.get<boolean>('includeLineNumber', false),
+    enableSmartSuggestions: config.get<boolean>('enableSmartSuggestions', true),
   };
 };
 

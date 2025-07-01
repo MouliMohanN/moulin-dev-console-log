@@ -27,7 +27,7 @@ export async function showVariableQuickPick(contextInfo: CodeContext): Promise<v
       const bucket = contextInfo.smartSuggestions[key as keyof VariableBuckets];
       if (bucket && bucket.length > 0) {
         hasSmartSuggestions = true;
-        privateUtils.addVariablesToQuickPick(allVariables, bucket, key, 'Suggested (based on cursor position): ');
+        privateUtils.addVariablesToQuickPick(allVariables, bucket, key, 'Suggested : ');
       }
     }
     // Add a separator if there are other variables to follow
@@ -70,9 +70,14 @@ export async function showVariableQuickPick(contextInfo: CodeContext): Promise<v
 
   const updatedSelectedItems =
     selectedItems?.map((item) => {
+      const replaceParentRegex = /Parent \(([^)]+)\): /;
+      const replaceSuggestedRegex = /Suggested : /;
+      const updatedLabel = item.label
+        .replace(replaceParentRegex, '') // Remove "Parent (contextName): "
+        .replace(replaceSuggestedRegex, ''); // Remove "Suggested : "
       return {
         ...item,
-        label: item.label.replace(/Parent ([^:]+): /, ''), // Remove
+        label: updatedLabel// Remove
       };
     }) || [];
 

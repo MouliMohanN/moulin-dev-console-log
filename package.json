@@ -141,7 +141,7 @@
         },
         "contextualConsoleLog.enableTelemetry": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Enable anonymous telemetry to help improve the extension."
         },
         "contextualConsoleLog.enableReduxContextLogging": {
@@ -179,6 +179,11 @@
           "type": "boolean",
           "default": true,
           "description": "Enable or disable filtering of unused variables from log suggestions."
+        },
+        "contextualConsoleLog.enableSmartSuggestions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable smart suggestions for variables to log."
         },
         "contextualConsoleLog.enableDuplicatePrevention": {
           "type": "boolean",

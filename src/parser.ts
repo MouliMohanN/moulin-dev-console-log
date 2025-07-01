@@ -79,7 +79,9 @@ const privateUtils = {
           }
           filterSensitiveKeys(newContext, config.sensitiveKeys);
           if (cursor && positionIn(node.loc, cursor, doc)) {
-            newContext.smartSuggestions = getSmartSuggestionsAtCursor(ast, cursor, doc, path.scope);
+            if (config.enableSmartSuggestions) {
+              newContext.smartSuggestions = getSmartSuggestionsAtCursor(ast, cursor, doc, path.scope);
+            }
             cursorFunctionContext = newContext;
           }
           allFunctionContexts.push(newContext);

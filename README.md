@@ -1,5 +1,7 @@
 # Contextual Console Log
 
+## Summary
+
 Debugging is a core part of development, but manually writing `console.log` statements is tedious and error-prone. You have to find the right place to log, figure out which variables are in scope, and then clean them all up afterward. This extension automates that entire process.
 
 Contextual Console Log is a powerful VS Code tool that acts as your debugging assistant. It intelligently analyzes your code in real-time to generate highly relevant and informative log statements exactly where you need them. Whether you're working with simple functions, complex React components, or legacy class-based code, this extension provides the context you need to find and fix bugs faster.
@@ -14,7 +16,7 @@ Contextual Console Log is a powerful VS Code tool that acts as your debugging as
 
 - **React and Hooks Support**: Built with modern web development in mind, it has first-class support for React. It correctly identifies and logs props, state, refs, context from `useContext`, and state/dispatch from `useReducer`. It's also smart enough to log the `.current` value of a ref and to ignore `setState` functions.
 
-- **Full Customization**: Every developer and team has their own style. The extension is highly configurable, allowing you to control everything from the log message prefix to the logging function itself. You can make it work with your existing logger (like MyLogger or AppLogger) and enforce a consistent style across your project.
+- **Full Customization**: Every developer and team has their own style. The extension is highly configurable, allowing you to control everything from the log message prefix to the logging function itself. You can make it work with your existing logger (like Winston or Pino) and enforce a consistent style across your project.
 
 - **Effortless Cleanup**: Forget hunting for `console.log` statements before a commit. The extension can tag every log it creates with a unique comment. A single command, `Clean Logs`, will then instantly remove all of these tagged logs from a file, ensuring your production code stays clean.
 
@@ -31,22 +33,23 @@ This shows the basic functionality of inserting a log into a standard JavaScript
 
 - **Before**:
 
-  ```javascript
-  function calculateTotal(price, quantity) {
-    const tax = 0.08;
-    // Cursor is here
-    return price * quantity * (1 + tax);
-  }
-  ```
+```javascript
+function calculateTotal(price, quantity) {
+  const tax = 0.08;
+  // Cursor is here
+  return price * quantity * (1 + tax);
+}
+```
 
 - **After**:
-  ```javascript
-  function calculateTotal(price, quantity) {
-    const tax = 0.08;
-    console.log('[script.js > calculateTotal]', { price, quantity, tax });
-    return price * quantity * (1 + tax);
-  }
-  ```
+
+```javascript
+function calculateTotal(price, quantity) {
+  const tax = 0.08;
+  console.log('[script.js > calculateTotal]', { price, quantity, tax });
+  return price * quantity * (1 + tax);
+}
+```
 
 ### Advanced Usage: A React Component
 
@@ -57,28 +60,29 @@ Here, the extension demonstrates its understanding of React-specific hooks and p
 
 - **Before**:
 
-  ```jsx
-  function UserProfile({ user }) {
-    const [isActive, setIsActive] = useState(true);
-    const profileRef = useRef(null);
-    // Cursor is here
-    return <div ref={profileRef}>{user.name}</div>;
-  }
-  ```
+```jsx
+function UserProfile({ user }) {
+  const [isActive, setIsActive] = useState(true);
+  const profileRef = useRef(null);
+  // Cursor is here
+  return <div ref={profileRef}>{user.name}</div>;
+}
+```
 
 - **After**:
-  ```jsx
-  function UserProfile({ user }) {
-    const [isActive, setIsActive] = useState(true);
-    const profileRef = useRef(null);
-    console.log('[UserProfile.jsx > UserProfile]', {
-      props: { user },
-      state: { isActive },
-      refs: { profileRef: profileRef.current },
-    });
-    return <div ref={profileRef}>{user.name}</div>;
-  }
-  ```
+
+```jsx
+function UserProfile({ user }) {
+  const [isActive, setIsActive] = useState(true);
+  const profileRef = useRef(null);
+  console.log('[UserProfile.jsx > UserProfile]', {
+    props: { user },
+    state: { isActive },
+    refs: { profileRef: profileRef.current },
+  });
+  return <div ref={profileRef}>{user.name}</div>;
+}
+```
 
 ## Configuration
 
@@ -88,7 +92,7 @@ Customize the extension by editing the VS Code settings (`settings.json`). Below
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
 | `contextualConsoleLog.logTemplate`                 | A template string for the log message prefix. Available variables: `${fileName}`, `${functionName}`, `${lineNumber}`.                                        | `"[${fileName} > ${functionName}]"`                           |
 | `contextualConsoleLog.logLevel`                    | The console method to use (e.g., `log`, `warn`, `debug`, `info`).                                                                                            | `"log"`                                                       |
-| `contextualConsoleLog.logFunction`                 | The logging object to call. Change this to use a custom logger like `MyLogger` or `AppLogger`.                                                               | `"console"`                                                   |
+| `contextualConsoleLog.logFunction`                 | The logging object to call. Change this to use a custom logger like `pino` or `winston`.                                                                     | `"console"`                                                   |
 | `contextualConsoleLog.logItems`                    | An array of context items to automatically include in the log suggestions.                                                                                   | `["props", "state", "refs", "context", "reducers", "locals"]` |
 | `contextualConsoleLog.addDebugger`                 | If true, inserts a `debugger;` statement before the log line for breakpoint debugging.                                                                       | `false`                                                       |
 | `contextualConsoleLog.wrapInDevCheck`              | If true, wraps the log statement in an environment check (`if (process.env.NODE_ENV !== 'production') { ... }`).                                             | `false`                                                       |
@@ -104,3 +108,4 @@ Customize the extension by editing the VS Code settings (`settings.json`). Below
 | `contextualConsoleLog.enableDuplicatePrevention`   | If true, prevents the extension from inserting a log statement if a similar one already exists.                                                              | `true`                                                        |
 | `contextualConsoleLog.enableTelemetry`             | Enable anonymous telemetry to help improve the extension.                                                                                                    | `true`                                                        |
 | `contextualConsoleLog.includeLineNumber`           | If true, includes the line number in the log message.                                                                                                        | `false`                                                       |
+| `contextualConsoleLog.enableSmartSuggestions`      | If true, enables smart suggestions for variables to log.                                                                                                     | `true`                                                        |
