@@ -1,1 +1,1 @@
-Remove showPreview feature completely
+Improve README.md file

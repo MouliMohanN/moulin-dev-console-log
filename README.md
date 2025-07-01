@@ -2,23 +2,28 @@
 
 ## Summary
 
-Debugging is a core part of development, but manually writing `console.log` statements is tedious and error-prone. You have to find the right place to log, figure out which variables are in scope, and then clean them all up afterward. This extension automates that entire process.
-
-Contextual Console Log is a powerful VS Code tool that acts as your debugging assistant. It intelligently analyzes your code in real-time to generate highly relevant and informative log statements exactly where you need them. Whether you're working with simple functions, complex React components, or legacy class-based code, this extension provides the context you need to find and fix bugs faster.
+Debugging can be a time-consuming process, especially when it involves manually inserting and removing `console.log` statements. This VS Code extension automates the generation of highly relevant and informative log statements, directly within your code, saving you time and reducing errors. It intelligently analyzes your code's context, from simple functions to complex React components, providing immediate insights to help you debug faster.
 
 ## Features
 
-- **Deep Contextual Analysis**: This is the core of the extension. It doesn't just find variables; it understands your code's structure using Abstract Syntax Trees (ASTs). It knows the difference between a function's arguments, a React component's props, state variables from the `useState` hook, and refs from `useRef`. This deep analysis results in logs that are incredibly insightful.
+- **Deep Contextual Analysis**: Leverages Abstract Syntax Trees (ASTs) to understand your code's structure. It accurately identifies function arguments, React props, state variables (from `useState`), and refs (from `useRef`), generating logs that are incredibly insightful and tailored to your code.
 
-- **Intelligent Log Generation**: The extension automatically formats logs to be as readable as possible. It includes the filename and the name of the function or component, so you always know the exact origin of a log message in your console.
+- **Intelligent Log Generation**: Automatically formats logs for maximum readability. Each log includes the filename and the name of the function or component, ensuring you always know the exact origin of a log message in your console.
 
-- **React and Hooks Support**: Built with modern web development in mind, it has first-class support for React. It correctly identifies and logs props, state, refs, context from `useContext`, and state/dispatch from `useReducer`. It's also smart enough to log the `.current` value of a ref and to ignore `setState` functions.
+- **React and Hooks Support**: Built with modern web development in mind, it offers first-class support for React. It correctly identifies and logs props, state, refs, and variables from `useContext` and `useReducer`. It also intelligently logs the `.current` value of a ref and ignores `setState` functions.
 
-- **Full Customization**: Every developer and team has their own style. The extension is highly configurable, allowing you to control everything from the log message prefix to the logging function itself. You can make it work with your existing logger (like Pino or Winston) and enforce a consistent style across your project.
+- **Full Customization**: Highly configurable to fit your team's coding style. Control everything from the log message prefix to the logging function itself. Integrate with your existing logging setup to maintain consistency across your project.
 
-- **Effortless Cleanup**: Forget hunting for `console.log` statements before a commit. The extension can tag every log it creates with a unique comment. A single command, `Clean Logs`, will then instantly remove all of these tagged logs from a file, ensuring your production code stays clean.
+- **Effortless Cleanup**: Say goodbye to manually removing `console.log` statements before commits. The extension can tag every log it creates with a unique comment. A single command, `Clean Logs`, will then instantly remove all of these tagged logs from a file, keeping your production code clean.
 
-- **Bulk Logging**: When you're new to a file or trying to understand a complex flow, you can use the `Insert Logs for File` command to automatically inject a contextual log into every function and component in the file, giving you a complete execution trace.
+- **Bulk Logging**: When exploring new files or complex flows, use the `Insert Logs for File` command to automatically inject contextual logs into every function and component in the file, providing a comprehensive execution trace.
+
+## Installation
+
+1.  Open VS Code.
+2.  Go to the Extensions view (`Ctrl+Shift+X` or `Cmd+Shift+X`).
+3.  Search for "Contextual Console Log".
+4.  Click "Install".
 
 ## Usage Examples
 
@@ -100,9 +105,7 @@ Customize the extension by editing the VS Code settings (`settings.json`). Below
 | `contextualConsoleLog.enableClassMethodLogging`    | Set to `true` to enable logging inside class component methods (e.g., `this.props`, `this.state`).                                                           | `true`                                                        |
 | `contextualConsoleLog.enableHookLogging`           | Set to `true` to enable logging for variables within React hooks like `useEffect`, `useMemo`, and `useCallback`.                                             | `true`                                                        |
 | `contextualConsoleLog.enableReduxContextLogging`   | Set to `true` to enable logging for Redux/Context stores (e.g., `useSelector`, `useContext`).                                                                | `false`                                                       |
-
-| `contextualConsoleLog.ignore` | An array of glob patterns for files/folders to ignore. This is in addition to `.eslintignore` and `.prettierignore`. | `[]` |
-| `contextualConsoleLog.filterUnusedVariables` | If true, filters out unused variables from the log suggestions to reduce clutter. | `true` |
-| `contextualConsoleLog.enableDuplicatePrevention` | If true, prevents the extension from inserting a log statement if a similar one already exists. | `true` |
-
-| `contextualConsoleLog.includeLineNumber` | If true, includes the line number in the log message. | `false` |
+| `contextualConsoleLog.ignore`                      | An array of glob patterns for files/folders to ignore. This is in addition to `.eslintignore` and `.prettierignore`.                                         | `[]`                                                          |
+| `contextualConsoleLog.filterUnusedVariables`       | If true, filters out unused variables from the log suggestions to reduce clutter.                                                                            | `true`                                                        |
+| `contextualConsoleLog.enableDuplicatePrevention`   | If true, prevents the extension from inserting a log statement if a similar one already exists.                                                              | `true`                                                        |
+| `contextualConsoleLog.includeLineNumber`           | If true, includes the line number in the log message.                                                                                                        | `false`                                                       |
