@@ -11,7 +11,7 @@ import { isFunctionNode, getFunctionName, detectComponent } from './parser/nodeU
 import { createEmptyVariableBuckets, extractArgs, collectClassMethodVars, collectVariableDeclaration } from './parser/contextCollectors';
 import { filterUnusedVariables, filterSensitiveKeys } from './parser/filterUtils';
 import { extractVariableNames } from './parser/variableUtils';
-import { getSmartSuggestionsAtCursor } from './parser/smartSuggestions';
+
 import { linkParentContexts } from './parser/contextLinker';
 
 const privateUtils = {
@@ -81,9 +81,7 @@ const privateUtils = {
           }
           filterSensitiveKeys(newContext, config.sensitiveKeys);
           if (cursor && positionIn(node.loc, cursor, doc)) {
-            if (config.enableSmartSuggestions) {
-              newContext.smartSuggestions = getSmartSuggestionsAtCursor(ast, cursor, doc, path.scope);
-            }
+            
             cursorFunctionContext = newContext;
           }
           allFunctionContexts.push(newContext);

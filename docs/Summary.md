@@ -92,8 +92,7 @@ Enhanced/Internal Features (discovered through full code review):
     - Redux/Context Logging: Specifically handles useSelector and useContext to log their values if enableReduxContextLogging is true.
     - Class Method Logging: Extracts this.props and this.state for class components if enableClassMethodLogging is true.
     - Hook Logging: Identifies variables within useEffect, useMemo, and useCallback dependencies if enableHookLogging is true.
-  - Smart Suggestions: Provides intelligent suggestions for variables to log based on the cursor's immediate vicinity (e.g., variables in return statements, assignment expressions, or
-    function arguments).
+  
   - Parent Context Linking: Can identify and link parent function/component contexts, allowing for logging of variables from outer scopes.
   - Unused Variable Filtering: Filters out variables that are not referenced in the code if filterUnusedVariables is true.
   - Sensitive Key Filtering: Prevents logging of variables matching a configurable list of sensitiveKeys (e.g., password, token).

@@ -10,7 +10,7 @@ Contextual Console Log is a powerful VS Code tool that acts as your debugging as
 
 - **Deep Contextual Analysis**: This is the core of the extension. It doesn't just find variables; it understands your code's structure using Abstract Syntax Trees (ASTs). It knows the difference between a function's arguments, a React component's props, state variables from the `useState` hook, and refs from `useRef`. This deep analysis results in logs that are incredibly insightful.
 
-- **Smart Suggestions**: The extension is intelligent about which variables to log. It analyzes the code at your cursor's position and provides suggestions for the most relevant variables. For example, it will prioritize variables found within a `return` statement or in the same line of code, assuming those are the most likely candidates for debugging.
+
 
 - **Intelligent Log Generation**: The extension automatically formats logs to be as readable as possible. It includes the filename and the name of the function or component, so you always know the exact origin of a log message in your console.
 
@@ -108,4 +108,4 @@ Customize the extension by editing the VS Code settings (`settings.json`). Below
 | `contextualConsoleLog.enableDuplicatePrevention`   | If true, prevents the extension from inserting a log statement if a similar one already exists.                                                              | `true`                                                        |
 | `contextualConsoleLog.enableTelemetry`             | Enable anonymous telemetry to help improve the extension.                                                                                                    | `false`                                                       |
 | `contextualConsoleLog.includeLineNumber`           | If true, includes the line number in the log message.                                                                                                        | `false`                                                       |
-| `contextualConsoleLog.enableSmartSuggestions`      | If true, enables smart suggestions for variables to log.                                                                                                     | `true`                                                        |
+

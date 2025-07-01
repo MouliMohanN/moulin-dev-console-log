@@ -22,7 +22,7 @@ suite('Config Test Suite', () => {
                             case 'enableHookLogging': return false;                            case 'logTag': return '// LOG';
                             case 'wrapInDevCheck': return true;                            case 'showPreview': return false;                            case 'enableTelemetry': return false;                            case 'enableContextLogging': return false;                            case 'enableReduxContextLogging': return false;                            case 'customLoggerImportStatement': return '';                            case 'sensitiveKeys': return ['secret'];                            case 'ignore': return [];                            case 'filterUnusedVariables': return false;                            case 'enableDuplicatePrevention': return false;
                             case 'includeLineNumber': return false;
-                            case 'enableSmartSuggestions': return true;
+                            
                             default: return defaultValue;                        }
                     }
                 } as any;            }
@@ -55,7 +55,7 @@ suite('Config Test Suite', () => {
         assert.strictEqual(config.filterUnusedVariables, false);
         assert.strictEqual(config.enableDuplicatePrevention, false);
         assert.strictEqual(config.includeLineNumber, false);
-        assert.strictEqual(config.enableSmartSuggestions, true);
+
     });
 
     test('setConfiguration should override values', () => {
@@ -79,7 +79,7 @@ suite('Config Test Suite', () => {
             filterUnusedVariables: true,
             enableDuplicatePrevention: true,
             includeLineNumber: true,
-            enableSmartSuggestions: false,
+            
         }));
 
         const config = getConfiguration();
@@ -102,7 +102,7 @@ suite('Config Test Suite', () => {
         assert.strictEqual(config.filterUnusedVariables, true);
         assert.strictEqual(config.enableDuplicatePrevention, true);
         assert.strictEqual(config.includeLineNumber, true);
-        assert.strictEqual(config.enableSmartSuggestions, false);
+        
     });
 
     test('resetConfiguration should restore default values', () => {
@@ -126,7 +126,7 @@ suite('Config Test Suite', () => {
             filterUnusedVariables: false,
             enableDuplicatePrevention: false,
             includeLineNumber: false,
-            enableSmartSuggestions: true,
+            
         }));
 
         resetConfiguration();
@@ -135,6 +135,6 @@ suite('Config Test Suite', () => {
         assert.strictEqual(config.logLevel, 'debug');
         assert.deepStrictEqual(config.logItems, ['locals']);
         assert.strictEqual(config.includeLineNumber, false);
-        assert.strictEqual(config.enableSmartSuggestions, true);
+
     });
 });

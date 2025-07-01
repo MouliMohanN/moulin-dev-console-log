@@ -62,7 +62,7 @@ suite('Parser Test Suite', () => {
             filterUnusedVariables: true,
             enableDuplicatePrevention: true,
             includeLineNumber: false,
-            enableSmartSuggestions: true,
+            
             ...initialConfig // Ensure initialConfig values take precedence
         }));
     }
@@ -260,15 +260,7 @@ suite('Parser Test Suite', () => {
         assert.deepStrictEqual(result[0].args, ['username']);
     }, { sensitiveKeys: ['password', 'token'], filterUnusedVariables: false });
 
-    runTest('parseCodeContextAtCursor should return smart suggestions', () => {
-        mockCode = `function myFunction(a, b) {\n  const c = 1;\n  const d = 2;\n}`;
-        const position = new vscode.Position(1, 10); // Inside myFunction
-        const result = parseCodeContextAtCursor(mockCode, position, doc);
-        assert.notStrictEqual(result, null);
-        assert.notStrictEqual(result?.smartSuggestions, undefined);
-        assert.deepStrictEqual(result?.smartSuggestions?.locals, ['a', 'b', 'c', 'd']);
-    }, {});
-
+    
     runTest('parseFileForFunctions should correctly identify insert position with return statement', () => {
         mockCode = `function myFunction() {\n  return 1;\n}`;
         const result = parseFileForFunctions(mockCode, doc);

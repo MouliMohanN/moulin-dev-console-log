@@ -20,21 +20,7 @@ const privateUtils = {
 export async function showVariableQuickPick(contextInfo: CodeContext): Promise<vscode.QuickPickItem[] | undefined> {
   const allVariables: vscode.QuickPickItem[] = [];
 
-  // Add smart suggestions first
-  if (contextInfo.smartSuggestions) {
-    let hasSmartSuggestions = false;
-    for (const key in contextInfo.smartSuggestions) {
-      const bucket = contextInfo.smartSuggestions[key as keyof VariableBuckets];
-      if (bucket && bucket.length > 0) {
-        hasSmartSuggestions = true;
-        privateUtils.addVariablesToQuickPick(allVariables, bucket, key, 'Suggested : ');
-      }
-    }
-    // Add a separator if there are other variables to follow
-    if (hasSmartSuggestions && (Object.values(contextInfo.variables).some((arr) => arr.length > 0) || contextInfo.args.length > 0)) {
-      allVariables.push({ label: '──────────', kind: vscode.QuickPickItemKind.Separator });
-    }
-  }
+  
 
   let currentContext: CodeContext | undefined = contextInfo;
   let depth = 0;
@@ -71,10 +57,10 @@ export async function showVariableQuickPick(contextInfo: CodeContext): Promise<v
   const updatedSelectedItems =
     selectedItems?.map((item) => {
       const replaceParentRegex = /Parent \(([^)]+)\): /;
-      const replaceSuggestedRegex = /Suggested : /;
+      
       const updatedLabel = item.label
-        .replace(replaceParentRegex, '') // Remove "Parent (contextName): "
-        .replace(replaceSuggestedRegex, ''); // Remove "Suggested : "
+        .replace(replaceParentRegex, ''); // Remove "Parent (contextName): "
+        
       return {
         ...item,
         label: updatedLabel// Remove

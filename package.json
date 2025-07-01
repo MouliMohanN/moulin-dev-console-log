@@ -180,11 +180,7 @@
           "default": true,
           "description": "Enable or disable filtering of unused variables from log suggestions."
         },
-        "contextualConsoleLog.enableSmartSuggestions": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable or disable smart suggestions for variables to log."
-        },
+        
         "contextualConsoleLog.enableDuplicatePrevention": {
           "type": "boolean",
           "default": true,
