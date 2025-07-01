@@ -92,10 +92,10 @@ Enhanced/Internal Features (discovered through full code review):
     - Redux/Context Logging: Specifically handles useSelector and useContext to log their values if enableReduxContextLogging is true.
     - Class Method Logging: Extracts this.props and this.state for class components if enableClassMethodLogging is true.
     - Hook Logging: Identifies variables within useEffect, useMemo, and useCallback dependencies if enableHookLogging is true.
-  
   - Parent Context Linking: Can identify and link parent function/component contexts, allowing for logging of variables from outer scopes.
   - Unused Variable Filtering: Filters out variables that are not referenced in the code if filterUnusedVariables is true.
   - Sensitive Key Filtering: Prevents logging of variables matching a configurable list of sensitiveKeys (e.g., password, token).
+
 - Intelligent Log Generation (`src/logGenerator.ts`):
   - Dynamically constructs console.log statements based on the extracted code context and user configurations.
   - Handles different log levels (log, warn, debug, info, customMethod).
@@ -108,12 +108,10 @@ Enhanced/Internal Features (discovered through full code review):
   - Respects .eslintignore and .prettierignore files, as well as a custom ignore setting, to prevent log insertion in ignored files.
   - Handles adding custom logger import statements at the top of the file if configured.
 - Preview Mode (`src/commands.ts`):
-  
 - Duplicate Log Prevention (`src/commands.ts`):
   - Intelligently checks for and skips the insertion of duplicate log statements if enableDuplicatePrevention is true.
 - Robust Logging & Telemetry (`src/logger.ts`):
   - Provides internal logging for the extension's operations (info, log, warn, error) to an output channel.
-  
 
 In essence, the extension is far more sophisticated than just a simple log inserter. It performs deep code analysis to provide highly contextual and customizable logging, aiming to
 streamline the debugging workflow for developers.

@@ -134,8 +134,6 @@
           "default": false,
           "description": "Wrap inserted logs in an environment check (e.g., `if (process.env.NODE_ENV !== 'production')`)."
         },
-        
-        
         "contextualConsoleLog.enableReduxContextLogging": {
           "type": "boolean",
           "default": false,

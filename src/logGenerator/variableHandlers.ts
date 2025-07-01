@@ -10,7 +10,9 @@ export function addVariables(
   for (const key in variables) {
     if (logItemsConfig.includes(key) && variables[key as keyof VariableBuckets].length) {
       if (key === 'refs') {
-        const filteredRefs = variables[key as keyof VariableBuckets].map((s: string) => `${s}: ${s}.current`).join(', ');
+        const filteredRefs = variables[key as keyof VariableBuckets]
+          .map((s: string) => `${s}: ${s}.current`)
+          .join(', ');
         if (filteredRefs) {
           parts.push(`${prefix}${key}: { ${filteredRefs} }`);
         }

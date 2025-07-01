@@ -99,8 +99,6 @@ const privateUtils = {
     });
   },
 
-  
-
   applyEdits: async function (
     editor: vscode.TextEditor,
     edits: { insertPos: vscode.Position; logLine: string }[],

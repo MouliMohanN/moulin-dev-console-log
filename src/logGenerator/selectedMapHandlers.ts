@@ -5,7 +5,7 @@ export function createSelectedMap(ctx: CodeContext, selectedItems: string[]): { 
   for (const typeKey in ctx.variables) {
     selectedMap[typeKey] = [];
   }
-  
+
   if (ctx.args && ctx.args.length > 0) {
     selectedMap.args = [];
   }

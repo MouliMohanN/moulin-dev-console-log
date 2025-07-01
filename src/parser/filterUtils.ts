@@ -1,4 +1,4 @@
-import { VariableBuckets, CodeContext } from '../types';
+import { CodeContext, VariableBuckets } from '../types';
 
 export function filterUnusedVariables(variables: VariableBuckets, scope: any) {
   filterVariables(variables, (name: string) => {

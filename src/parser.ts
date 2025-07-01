@@ -7,10 +7,14 @@ import { getConfiguration } from './config';
 import { CodeContext, VariableBuckets } from './types';
 import { findReturnInsertPosition, positionIn } from './utils';
 
-import { isFunctionNode, getFunctionName, detectComponent } from './parser/nodeUtils';
-import { createEmptyVariableBuckets, extractArgs, collectClassMethodVars, collectVariableDeclaration } from './parser/contextCollectors';
-import { filterUnusedVariables, filterSensitiveKeys } from './parser/filterUtils';
-import { extractVariableNames } from './parser/variableUtils';
+import {
+  collectClassMethodVars,
+  collectVariableDeclaration,
+  createEmptyVariableBuckets,
+  extractArgs,
+} from './parser/contextCollectors';
+import { filterSensitiveKeys, filterUnusedVariables } from './parser/filterUtils';
+import { detectComponent, getFunctionName, isFunctionNode } from './parser/nodeUtils';
 
 import { linkParentContexts } from './parser/contextLinker';
 
@@ -81,7 +85,6 @@ const privateUtils = {
           }
           filterSensitiveKeys(newContext, config.sensitiveKeys);
           if (cursor && positionIn(node.loc, cursor, doc)) {
-            
             cursorFunctionContext = newContext;
           }
           allFunctionContexts.push(newContext);

@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { getConfiguration } from './config';
 
 let useOutputChannel = false;
 let outputChannel: vscode.OutputChannel | null = null;
@@ -34,8 +33,6 @@ const privateUtils = {
     console[level](formatted, data ?? '');
     privateUtils.showVSCodeMessage(level, messageWithTag);
   },
-
-  
 };
 
 export function initLogger(useOutput: boolean, channelName = 'contextualConsoleLog.insertLog') {
@@ -50,7 +47,7 @@ export const logger = {
   log: (message: string, data?: any) => privateUtils.writeLog('log', message, data),
   warn: (message: string, data?: any) => privateUtils.writeLog('warn', message, data),
   error: (message: string, data?: any) => privateUtils.writeLog('error', message, data),
-  
+
   dispose: () => outputChannel?.dispose(),
   clear: () => outputChannel?.clear(),
 };

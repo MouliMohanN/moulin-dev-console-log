@@ -39,9 +39,8 @@ export function activate(context: vscode.ExtensionContext) {
     insertLogForFileCommand,
   );
 
-  const openTemplateEditorDisposable = vscode.commands.registerCommand(
-    'contextualConsoleLog.openTemplateEditor',
-    () => openTemplateEditor(context),
+  const openTemplateEditorDisposable = vscode.commands.registerCommand('contextualConsoleLog.openTemplateEditor', () =>
+    openTemplateEditor(context),
   );
 
   context.subscriptions.push(

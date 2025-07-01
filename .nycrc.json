@@ -1,20 +1,10 @@
 {
   "extends": "@istanbuljs/nyc-config-typescript",
-  "extension": [
-    ".js"
-  ],
-  "reporter": [
-    "lcov",
-    "text"
-  ],
+  "extension": [".js"],
+  "reporter": ["lcov", "text"],
   "all": true,
-  "include": [
-    "out/src/**/*.js"
-  ],
-  "exclude": [
-    "**/*.d.ts",
-    "out/src/types.js"
-  ],
+  "include": ["out/src/**/*.js"],
+  "exclude": ["**/*.d.ts", "out/src/types.js"],
   "sourceMap": true,
   "check-coverage": true,
   "statements": 90,

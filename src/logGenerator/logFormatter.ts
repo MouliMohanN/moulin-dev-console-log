@@ -9,7 +9,8 @@ export function formatLogLine(
 ): string {
   let logLine = `${logFunction}.${logLevel}('${prefix}', ${logObject});`;
   if (wrapInDevCheck) {
-    logLine = `if (process.env.NODE_ENV !== 'production') {\n  ${logLine}\n}`;}
+    logLine = `if (process.env.NODE_ENV !== 'production') {\n  ${logLine}\n}`;
+  }
   if (logTag) {
     logLine = `${logLine} ${logTag}`;
   }

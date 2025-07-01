@@ -1,13 +1,13 @@
 import { getConfiguration } from './config';
-import { CodeContext } from './types';
-import { buildLogObject, buildParentLogObject } from './logGenerator/logObjectBuilders';
-import { addVariables } from './logGenerator/variableHandlers';
-import { createSelectedMap, stringifySelectedMap } from './logGenerator/selectedMapHandlers';
 import { formatLogLine } from './logGenerator/logFormatter';
+import { buildLogObject } from './logGenerator/logObjectBuilders';
+import { createSelectedMap, stringifySelectedMap } from './logGenerator/selectedMapHandlers';
+import { CodeContext } from './types';
 
 export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedItems?: string[]): string {
   const config = getConfiguration();
-  const { logTemplate, logLevel, addDebugger, logItems, logFunction, logTag, wrapInDevCheck, includeLineNumber } = config;
+  const { logTemplate, logLevel, addDebugger, logItems, logFunction, logTag, wrapInDevCheck, includeLineNumber } =
+    config;
   let prefix = logTemplate.replace('${fileName}', fileName).replace('${functionName}', ctx.name);
   if (includeLineNumber) {
     if (!logTemplate.includes('${lineNumber}')) {

@@ -1,18 +1,12 @@
 import * as vscode from 'vscode';
 import { getConfiguration } from './config';
-import { generateConsoleLog } from './logGenerator';
 import { logger } from './logger';
 
 export function openTemplateEditor(context: vscode.ExtensionContext) {
-  const panel = vscode.window.createWebviewPanel(
-    'logTemplateEditor',
-    'Log Template Editor',
-    vscode.ViewColumn.One,
-    {
-      enableScripts: true,
-      retainContextWhenHidden: true,
-    },
-  );
+  const panel = vscode.window.createWebviewPanel('logTemplateEditor', 'Log Template Editor', vscode.ViewColumn.One, {
+    enableScripts: true,
+    retainContextWhenHidden: true,
+  });
 
   panel.webview.html = getWebviewContent(panel.webview, context.extensionUri);
 
@@ -33,42 +27,37 @@ export function openTemplateEditor(context: vscode.ExtensionContext) {
   updateWebview();
 
   // Listen for configuration changes
-  vscode.workspace.onDidChangeConfiguration(e => {
-    if (e.affectsConfiguration('contextualConsoleLog.logTemplate') ||
-        e.affectsConfiguration('contextualConsoleLog.logLevel') ||
-        e.affectsConfiguration('contextualConsoleLog.logFunction')) {
+  vscode.workspace.onDidChangeConfiguration((e) => {
+    if (
+      e.affectsConfiguration('contextualConsoleLog.logTemplate') ||
+      e.affectsConfiguration('contextualConsoleLog.logLevel') ||
+      e.affectsConfiguration('contextualConsoleLog.logFunction')
+    ) {
       updateWebview();
     }
   });
 
   panel.webview.onDidReceiveMessage(
-    async message => {
+    async (message) => {
       switch (message.command) {
         case 'updateTemplate':
-          await vscode.workspace.getConfiguration('contextualConsoleLog').update(
-            'logTemplate',
-            message.template,
-            vscode.ConfigurationTarget.Global,
-          );
+          await vscode.workspace
+            .getConfiguration('contextualConsoleLog')
+            .update('logTemplate', message.template, vscode.ConfigurationTarget.Global);
           logger.info('Log template updated.');
           break;
         case 'updateLogLevel':
-          await vscode.workspace.getConfiguration('contextualConsoleLog').update(
-            'logLevel',
-            message.logLevel,
-            vscode.ConfigurationTarget.Global,
-          );
+          await vscode.workspace
+            .getConfiguration('contextualConsoleLog')
+            .update('logLevel', message.logLevel, vscode.ConfigurationTarget.Global);
           logger.info('Log level updated.');
           break;
         case 'updateLogFunction':
-          await vscode.workspace.getConfiguration('contextualConsoleLog').update(
-            'logFunction',
-            message.logFunction,
-            vscode.ConfigurationTarget.Global,
-          );
+          await vscode.workspace
+            .getConfiguration('contextualConsoleLog')
+            .update('logFunction', message.logFunction, vscode.ConfigurationTarget.Global);
           logger.info('Log function updated.');
           break;
-        
       }
     },
     undefined,

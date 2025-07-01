@@ -10,8 +10,6 @@ Contextual Console Log is a powerful VS Code tool that acts as your debugging as
 
 - **Deep Contextual Analysis**: This is the core of the extension. It doesn't just find variables; it understands your code's structure using Abstract Syntax Trees (ASTs). It knows the difference between a function's arguments, a React component's props, state variables from the `useState` hook, and refs from `useRef`. This deep analysis results in logs that are incredibly insightful.
 
-
-
 - **Intelligent Log Generation**: The extension automatically formats logs to be as readable as possible. It includes the filename and the name of the function or component, so you always know the exact origin of a log message in your console.
 
 - **React and Hooks Support**: Built with modern web development in mind, it has first-class support for React. It correctly identifies and logs props, state, refs, context from `useContext`, and state/dispatch from `useReducer`. It's also smart enough to log the `.current` value of a ref and to ignore `setState` functions.
@@ -103,9 +101,8 @@ Customize the extension by editing the VS Code settings (`settings.json`). Below
 | `contextualConsoleLog.enableHookLogging`           | Set to `true` to enable logging for variables within React hooks like `useEffect`, `useMemo`, and `useCallback`.                                             | `true`                                                        |
 | `contextualConsoleLog.enableReduxContextLogging`   | Set to `true` to enable logging for Redux/Context stores (e.g., `useSelector`, `useContext`).                                                                | `false`                                                       |
 
-| `contextualConsoleLog.ignore`                      | An array of glob patterns for files/folders to ignore. This is in addition to `.eslintignore` and `.prettierignore`.                                         | `[]`                                                          |
-| `contextualConsoleLog.filterUnusedVariables`       | If true, filters out unused variables from the log suggestions to reduce clutter.                                                                            | `true`                                                        |
-| `contextualConsoleLog.enableDuplicatePrevention`   | If true, prevents the extension from inserting a log statement if a similar one already exists.                                                              | `true`                                                        |
+| `contextualConsoleLog.ignore` | An array of glob patterns for files/folders to ignore. This is in addition to `.eslintignore` and `.prettierignore`. | `[]` |
+| `contextualConsoleLog.filterUnusedVariables` | If true, filters out unused variables from the log suggestions to reduce clutter. | `true` |
+| `contextualConsoleLog.enableDuplicatePrevention` | If true, prevents the extension from inserting a log statement if a similar one already exists. | `true` |
 
-| `contextualConsoleLog.includeLineNumber`           | If true, includes the line number in the log message.                                                                                                        | `false`                                                       |
-
+| `contextualConsoleLog.includeLineNumber` | If true, includes the line number in the log message. | `false` |

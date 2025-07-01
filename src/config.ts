@@ -10,8 +10,7 @@ export interface ExtensionConfig {
   enableHookLogging: boolean;
   logTag: string;
   wrapInDevCheck: boolean;
-  
-  
+
   enableContextLogging: boolean;
   enableReduxContextLogging: boolean;
   customLoggerImportStatement: string;
@@ -20,7 +19,6 @@ export interface ExtensionConfig {
   filterUnusedVariables: boolean;
   enableDuplicatePrevention: boolean;
   includeLineNumber: boolean;
-  
 }
 
 export let getConfiguration: () => ExtensionConfig;
@@ -43,8 +41,7 @@ let defaultGetConfiguration = (): ExtensionConfig => {
     enableHookLogging: config.get<boolean>('enableHookLogging', true),
     logTag: config.get<string>('logTag', '// @contextual-log'),
     wrapInDevCheck: config.get<boolean>('wrapInDevCheck', false),
-    
-    
+
     enableContextLogging: config.get<boolean>('enableContextLogging', true),
     enableReduxContextLogging: config.get<boolean>('enableReduxContextLogging', false),
     customLoggerImportStatement: config.get<string>('customLoggerImportStatement', ''),
@@ -53,7 +50,6 @@ let defaultGetConfiguration = (): ExtensionConfig => {
     filterUnusedVariables: config.get<boolean>('filterUnusedVariables', true),
     enableDuplicatePrevention: config.get<boolean>('enableDuplicatePrevention', true),
     includeLineNumber: config.get<boolean>('includeLineNumber', false),
-    
   };
 };
 
@@ -77,4 +73,3 @@ export function onDidChangeConfiguration(
 ): vscode.Disposable {
   return vscode.workspace.onDidChangeConfiguration(callback, thisArgs, disposables);
 }
-

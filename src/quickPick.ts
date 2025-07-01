@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { CodeContext, VariableBuckets } from './types';
+import { CodeContext } from './types';
 
 const privateUtils = {
   getScopePrefix(depth: number, contextName: string): string {
@@ -19,8 +19,6 @@ const privateUtils = {
 
 export async function showVariableQuickPick(contextInfo: CodeContext): Promise<vscode.QuickPickItem[] | undefined> {
   const allVariables: vscode.QuickPickItem[] = [];
-
-  
 
   let currentContext: CodeContext | undefined = contextInfo;
   let depth = 0;
@@ -57,13 +55,12 @@ export async function showVariableQuickPick(contextInfo: CodeContext): Promise<v
   const updatedSelectedItems =
     selectedItems?.map((item) => {
       const replaceParentRegex = /Parent \(([^)]+)\): /;
-      
-      const updatedLabel = item.label
-        .replace(replaceParentRegex, ''); // Remove "Parent (contextName): "
-        
+
+      const updatedLabel = item.label.replace(replaceParentRegex, ''); // Remove "Parent (contextName): "
+
       return {
         ...item,
-        label: updatedLabel// Remove
+        label: updatedLabel, // Remove
       };
     }) || [];
 

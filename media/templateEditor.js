@@ -4,9 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const logTemplateInput = document.getElementById('logTemplate');
   const logLevelSelect = document.getElementById('logLevel');
   const logFunctionInput = document.getElementById('logFunction');
-  
 
-  window.addEventListener('message', event => {
+  window.addEventListener('message', (event) => {
     const message = event.data;
     switch (message.type) {
       case 'updateConfig':
@@ -14,44 +13,39 @@ document.addEventListener('DOMContentLoaded', () => {
         logLevelSelect.value = message.logLevel;
         logFunctionInput.value = message.logFunction;
         vscode.postMessage({
-          command: 'requestPreview'
+          command: 'requestPreview',
         });
         break;
-      
     }
   });
 
   logTemplateInput.addEventListener('input', () => {
     vscode.postMessage({
       command: 'updateTemplate',
-      template: logTemplateInput.value
+      template: logTemplateInput.value,
     });
     vscode.postMessage({
-      command: 'requestPreview'
+      command: 'requestPreview',
     });
   });
 
   logLevelSelect.addEventListener('change', () => {
     vscode.postMessage({
       command: 'updateLogLevel',
-      logLevel: logLevelSelect.value
+      logLevel: logLevelSelect.value,
     });
     vscode.postMessage({
-      command: 'requestPreview'
+      command: 'requestPreview',
     });
   });
 
   logFunctionInput.addEventListener('input', () => {
     vscode.postMessage({
       command: 'updateLogFunction',
-      logFunction: logFunctionInput.value
+      logFunction: logFunctionInput.value,
     });
     vscode.postMessage({
-      command: 'requestPreview'
+      command: 'requestPreview',
     });
   });
-
-  
-
-  
 });

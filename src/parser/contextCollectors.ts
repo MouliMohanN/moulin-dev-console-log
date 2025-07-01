@@ -1,5 +1,5 @@
-import * as t from '@babel/types';
 import traverse from '@babel/traverse';
+import * as t from '@babel/types';
 import * as vscode from 'vscode';
 import { CodeContext, VariableBuckets } from '../types';
 import { extractVariableNames } from './variableUtils';
