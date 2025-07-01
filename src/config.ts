@@ -11,7 +11,7 @@ export interface ExtensionConfig {
   logTag: string;
   wrapInDevCheck: boolean;
   showPreview: boolean;
-  enableTelemetry: boolean;
+  
   enableContextLogging: boolean;
   enableReduxContextLogging: boolean;
   customLoggerImportStatement: string;
@@ -36,7 +36,7 @@ let defaultGetConfiguration = (): ExtensionConfig => {
   return {
     logTemplate: config.get<string>('logTemplate', '[${fileName} > ${functionName}]'),
     logLevel: config.get<string>('logLevel', 'log'),
-    logItems: config.get<string[]>('logItems', ['props', 'state', 'refs', 'context', 'reducers', 'locals']),
+    logItems: config.get<string[]>('logItems', ['props', 'state', 'refs', 'context', 'reducers', 'locals', 'args']),
     addDebugger: config.get<boolean>('addDebugger', false),
     logFunction: config.get<string>('logFunction', 'console'),
     enableClassMethodLogging: config.get<boolean>('enableClassMethodLogging', true),
@@ -44,7 +44,7 @@ let defaultGetConfiguration = (): ExtensionConfig => {
     logTag: config.get<string>('logTag', '// @contextual-log'),
     wrapInDevCheck: config.get<boolean>('wrapInDevCheck', false),
     showPreview: config.get<boolean>('showPreview', false),
-    enableTelemetry: config.get<boolean>('enableTelemetry', true),
+    
     enableContextLogging: config.get<boolean>('enableContextLogging', true),
     enableReduxContextLogging: config.get<boolean>('enableReduxContextLogging', false),
     customLoggerImportStatement: config.get<string>('customLoggerImportStatement', ''),

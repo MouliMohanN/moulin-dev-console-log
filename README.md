@@ -106,6 +106,6 @@ Customize the extension by editing the VS Code settings (`settings.json`). Below
 | `contextualConsoleLog.ignore`                      | An array of glob patterns for files/folders to ignore. This is in addition to `.eslintignore` and `.prettierignore`.                                         | `[]`                                                          |
 | `contextualConsoleLog.filterUnusedVariables`       | If true, filters out unused variables from the log suggestions to reduce clutter.                                                                            | `true`                                                        |
 | `contextualConsoleLog.enableDuplicatePrevention`   | If true, prevents the extension from inserting a log statement if a similar one already exists.                                                              | `true`                                                        |
-| `contextualConsoleLog.enableTelemetry`             | Enable anonymous telemetry to help improve the extension.                                                                                                    | `false`                                                       |
+
 | `contextualConsoleLog.includeLineNumber`           | If true, includes the line number in the log message.                                                                                                        | `false`                                                       |
 

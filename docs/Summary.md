@@ -78,7 +78,7 @@ The extension offers a wide range of settings to customize the log output, inclu
   - Insert for File: Inserts contextual logs for an entire file, identifying functions and components.
 - Toggle Logging: Enables/disables log insertion via a status bar item.
 - Customization & Configuration: Extensive settings for log output, including logTemplate, logLevel, logFunction, logItems, addDebugger, enableClassMethodLogging, enableHookLogging,
-  logTag, wrapInDevCheck, showPreview, enableTelemetry, enableReduxContextLogging, customLoggerImportStatement, sensitiveKeys, ignore, filterUnusedVariables, and
+  logTag, wrapInDevCheck, showPreview, enableReduxContextLogging, customLoggerImportStatement, sensitiveKeys, ignore, filterUnusedVariables, and
   enableDuplicatePrevention.
 - Keybinding: ctrl+shift+l for quick log insertion.
 
@@ -113,7 +113,7 @@ Enhanced/Internal Features (discovered through full code review):
   - Intelligently checks for and skips the insertion of duplicate log statements if enableDuplicatePrevention is true.
 - Robust Logging & Telemetry (`src/logger.ts`):
   - Provides internal logging for the extension's operations (info, log, warn, error) to an output channel.
-  - Includes a placeholder for telemetry reporting (though currently commented out, it indicates an intention for anonymous usage data collection if enableTelemetry is true).
+  
 
 In essence, the extension is far more sophisticated than just a simple log inserter. It performs deep code analysis to provide highly contextual and customizable logging, aiming to
 streamline the debugging workflow for developers.

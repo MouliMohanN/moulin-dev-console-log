@@ -35,14 +35,7 @@ const privateUtils = {
     privateUtils.showVSCodeMessage(level, messageWithTag);
   },
 
-  sendTelemetryError(error: Error, properties?: { [key: string]: string }) {
-    const config = getConfiguration();
-    if (config.enableTelemetry) {
-      logger.log('Telemetry: Sending error report.', { message: error.message, ...properties });
-      // In a real extension, you would use TelemetryReporter here.
-      // For example: telemetryReporter.sendTelemetryErrorEvent('error', properties, { message: error.message });
-    }
-  },
+  
 };
 
 export function initLogger(useOutput: boolean, channelName = 'contextualConsoleLog.insertLog') {
@@ -57,8 +50,7 @@ export const logger = {
   log: (message: string, data?: any) => privateUtils.writeLog('log', message, data),
   warn: (message: string, data?: any) => privateUtils.writeLog('warn', message, data),
   error: (message: string, data?: any) => privateUtils.writeLog('error', message, data),
-  sendError: (error: Error, properties?: { [key: string]: string }) =>
-    privateUtils.sendTelemetryError(error, properties),
+  
   dispose: () => outputChannel?.dispose(),
   clear: () => outputChannel?.clear(),
 };

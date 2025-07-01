@@ -139,11 +139,7 @@
           "default": false,
           "description": "Show a preview of the log insertion before applying changes."
         },
-        "contextualConsoleLog.enableTelemetry": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enable anonymous telemetry to help improve the extension."
-        },
+        
         "contextualConsoleLog.enableReduxContextLogging": {
           "type": "boolean",
           "default": false,
@@ -180,7 +176,6 @@
           "default": true,
           "description": "Enable or disable filtering of unused variables from log suggestions."
         },
-        
         "contextualConsoleLog.enableDuplicatePrevention": {
           "type": "boolean",
           "default": true,
@@ -207,7 +202,7 @@
     "compile-tests": "tsc -p tsconfig.json --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run clean && npm run compile-tests && npm run compile && npm run lint",
-    "clean": "(if exist out (rd /s /q out)) && (if exist .vscode-test (rd /s /q .vscode-test)) && (if exist dist (rd /s /q dist))",
+    "clean": "(if exist out (rd /s /q out)) && (if exist dist (rd /s /q dist))",
     "check-types": "tsc --noEmit",
     "lint": "eslint src --fix",
     "prettier:write": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",

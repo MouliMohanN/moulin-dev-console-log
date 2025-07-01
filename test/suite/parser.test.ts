@@ -53,7 +53,7 @@ suite('Parser Test Suite', () => {
             logTag: '// @contextual-log',
             wrapInDevCheck: false,
             showPreview: false,
-            enableTelemetry: true,
+            
             enableContextLogging: true,
             enableReduxContextLogging: false,
             customLoggerImportStatement: '',

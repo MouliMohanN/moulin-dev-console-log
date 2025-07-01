@@ -20,7 +20,7 @@ suite('Config Test Suite', () => {
                             case 'logFunction': return 'console';
                             case 'enableClassMethodLogging': return false;
                             case 'enableHookLogging': return false;                            case 'logTag': return '// LOG';
-                            case 'wrapInDevCheck': return true;                            case 'showPreview': return false;                            case 'enableTelemetry': return false;                            case 'enableContextLogging': return false;                            case 'enableReduxContextLogging': return false;                            case 'customLoggerImportStatement': return '';                            case 'sensitiveKeys': return ['secret'];                            case 'ignore': return [];                            case 'filterUnusedVariables': return false;                            case 'enableDuplicatePrevention': return false;
+                            case 'wrapInDevCheck': return true;                            case 'showPreview': return false;                                                        case 'enableContextLogging': return false;                            case 'enableReduxContextLogging': return false;                            case 'customLoggerImportStatement': return '';                            case 'sensitiveKeys': return ['secret'];                            case 'ignore': return [];                            case 'filterUnusedVariables': return false;                            case 'enableDuplicatePrevention': return false;
                             case 'includeLineNumber': return false;
                             
                             default: return defaultValue;                        }
@@ -46,7 +46,7 @@ suite('Config Test Suite', () => {
         assert.strictEqual(config.logTag, '// LOG');
         assert.strictEqual(config.wrapInDevCheck, true);
         assert.strictEqual(config.showPreview, false);
-        assert.strictEqual(config.enableTelemetry, false);
+        
         assert.strictEqual(config.enableContextLogging, false);
         assert.strictEqual(config.enableReduxContextLogging, false);
         assert.strictEqual(config.customLoggerImportStatement, '');
@@ -70,7 +70,7 @@ suite('Config Test Suite', () => {
             logTag: '// CUSTOM_TAG',
             wrapInDevCheck: false,
             showPreview: true,
-            enableTelemetry: true,
+            
             enableContextLogging: true,
             enableReduxContextLogging: true,
             customLoggerImportStatement: 'import { custom } from \'custom\';',
@@ -93,7 +93,7 @@ suite('Config Test Suite', () => {
         assert.strictEqual(config.logTag, '// CUSTOM_TAG');
         assert.strictEqual(config.wrapInDevCheck, false);
         assert.strictEqual(config.showPreview, true);
-        assert.strictEqual(config.enableTelemetry, true);
+        
         assert.strictEqual(config.enableContextLogging, true);
         assert.strictEqual(config.enableReduxContextLogging, true);
         assert.strictEqual(config.customLoggerImportStatement, 'import { custom } from \'custom\';');
@@ -117,7 +117,7 @@ suite('Config Test Suite', () => {
             logTag: 'TEMP',
             wrapInDevCheck: false,
             showPreview: false,
-            enableTelemetry: false,
+            
             enableContextLogging: false,
             enableReduxContextLogging: false,
             customLoggerImportStatement: 'TEMP',
