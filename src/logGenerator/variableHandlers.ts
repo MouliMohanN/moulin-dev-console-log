@@ -10,13 +10,22 @@ export function addVariables(
   for (const key in variables) {
     if (logItemsConfig.includes(key) && variables[key as keyof VariableBuckets].length) {
       if (key === 'refs') {
-        parts.push(`${prefix}${key}: { ${variables[key as keyof VariableBuckets].map((s: string) => `${s}: ${s}.current`).join(', ')} }`);
+        const filteredRefs = variables[key as keyof VariableBuckets].map((s: string) => `...(typeof ${s}.current !== 'function' && { ${s}: ${s}.current })`).join(', ');
+        if (filteredRefs) {
+          parts.push(`${prefix}${key}: { ${filteredRefs} }`);
+        }
       } else if (key === 'reducers') {
-        parts.push(`${prefix}reducer: { ${variables[key as keyof VariableBuckets].join(', ')} }`);
+        const filteredReducers = variables[key as keyof VariableBuckets].map((s: string) => `...(typeof ${s} !== 'function' && { ${s}: ${s} })`).join(', ');
+        if (filteredReducers) {
+          parts.push(`${prefix}reducer: { ${filteredReducers} }`);
+        }
       } else if (key === 'args' && context.type !== 'function') {
         continue;
       } else {
-        parts.push(`${prefix}${key}: { ${variables[key as keyof VariableBuckets].join(', ')} }`);
+        const filteredVars = variables[key as keyof VariableBuckets].map((s: string) => `...(typeof ${s} !== 'function' && { ${s}: ${s} })`).join(', ');
+        if (filteredVars) {
+          parts.push(`${prefix}${key}: { ${filteredVars} }`);
+        }
       }
     }
   }
