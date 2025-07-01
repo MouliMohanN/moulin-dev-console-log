@@ -200,7 +200,7 @@ suite('Parser Test Suite', () => {
         console.log(result);
         logger.log('MouliTesting ', result);
         assert.strictEqual(result.length, 1);
-        assert.deepStrictEqual(result[0].variables.reducers, ['state: state, dispatch: dispatch']);
+        assert.deepStrictEqual(result[0].variables.reducers, ['state']);
     }, { filterUnusedVariables: false });
 
     runTest('parseFileForFunctions should identify redux context (useSelector)', () => {

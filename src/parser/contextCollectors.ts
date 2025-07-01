@@ -79,8 +79,8 @@ export function collectVariableDeclaration(
         }
         break;
       case 'useReducer':
-        if (names.length >= 2) {
-          newContext.variables.reducers.push(`${names[0]}: ${names[0]}, ${names[1]}: ${names[1]}`);
+        if (names.length >= 1) {
+          newContext.variables.reducers.push(names[0]);
         }
         break;
       case 'useSelector':
