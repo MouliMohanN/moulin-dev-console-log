@@ -68,29 +68,7 @@ export function openTemplateEditor(context: vscode.ExtensionContext) {
           );
           logger.info('Log function updated.');
           break;
-        case 'requestPreview':
-          const dummyContext = {
-            type: 'function' as const,
-            name: 'myFunction',
-            args: ['arg1', 'arg2'],
-            variables: {
-              props: ['propA', 'propB'],
-              state: ['stateX', 'stateY'],
-              refs: ['refY', 'refZ'],
-              context: ['ctxZ', 'ctxA'],
-              reducers: ['reducerR', 'reducerS'],
-              locals: ['localV', 'localW'],
-              reduxContext: ['reduxC', 'reduxD'],
-              args: ['arg1', 'arg2'],
-            },
-            insertPos: new vscode.Position(0, 0),
-          };
-          const previewLog = generateConsoleLog(dummyContext, 'myFile.ts');
-          panel.webview.postMessage({
-            type: 'showPreview',
-            preview: previewLog,
-          });
-          break;
+        
       }
     },
     undefined,
@@ -118,7 +96,7 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
         <div class="control-group">
             <label for="logTemplate">Log Template:</label>
             <input type="text" id="logTemplate" value="" />
-            <small>Available variables: &dollar;{fileName}, &dollar;{functionName}, &dollar;{props}, &dollar;{state}, &dollar;{refs}, &dollar;{context}, &dollar;{reducers}, &dollar;{locals}, &dollar;{args}, &dollar;{reduxContext}</small>
+            <small>Available variables: &dollar;{fileName}, &dollar;{functionName}, &dollar;{lineNumber} (if enabled in settings)</small>
         </div>
 
         <div class="control-group">
@@ -137,11 +115,6 @@ function getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
             <input type="text" id="logFunction" value="console" />
             <small>e.g., console, myLogger</small>
         </div>
-
-        <button id="previewButton">Generate Preview</button>
-
-        <h2>Preview:</h2>
-        <pre id="logPreview"></pre>
 
         <script nonce="${nonce}" src="${scriptUri}"></script>
     </body>

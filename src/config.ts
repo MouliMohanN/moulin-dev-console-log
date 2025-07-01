@@ -10,7 +10,7 @@ export interface ExtensionConfig {
   enableHookLogging: boolean;
   logTag: string;
   wrapInDevCheck: boolean;
-  showPreview: boolean;
+  
   
   enableContextLogging: boolean;
   enableReduxContextLogging: boolean;
@@ -43,7 +43,7 @@ let defaultGetConfiguration = (): ExtensionConfig => {
     enableHookLogging: config.get<boolean>('enableHookLogging', true),
     logTag: config.get<string>('logTag', '// @contextual-log'),
     wrapInDevCheck: config.get<boolean>('wrapInDevCheck', false),
-    showPreview: config.get<boolean>('showPreview', false),
+    
     
     enableContextLogging: config.get<boolean>('enableContextLogging', true),
     enableReduxContextLogging: config.get<boolean>('enableReduxContextLogging', false),

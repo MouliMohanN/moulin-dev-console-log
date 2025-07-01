@@ -78,7 +78,7 @@ The extension offers a wide range of settings to customize the log output, inclu
   - Insert for File: Inserts contextual logs for an entire file, identifying functions and components.
 - Toggle Logging: Enables/disables log insertion via a status bar item.
 - Customization & Configuration: Extensive settings for log output, including logTemplate, logLevel, logFunction, logItems, addDebugger, enableClassMethodLogging, enableHookLogging,
-  logTag, wrapInDevCheck, showPreview, enableReduxContextLogging, customLoggerImportStatement, sensitiveKeys, ignore, filterUnusedVariables, and
+  logTag, wrapInDevCheck, enableReduxContextLogging, customLoggerImportStatement, sensitiveKeys, ignore, filterUnusedVariables, and
   enableDuplicatePrevention.
 - Keybinding: ctrl+shift+l for quick log insertion.
 
@@ -108,7 +108,7 @@ Enhanced/Internal Features (discovered through full code review):
   - Respects .eslintignore and .prettierignore files, as well as a custom ignore setting, to prevent log insertion in ignored files.
   - Handles adding custom logger import statements at the top of the file if configured.
 - Preview Mode (`src/commands.ts`):
-  - Offers a preview of the changes before applying them, using VS Code's built-in diff view, if showPreview is enabled.
+  
 - Duplicate Log Prevention (`src/commands.ts`):
   - Intelligently checks for and skips the insertion of duplicate log statements if enableDuplicatePrevention is true.
 - Robust Logging & Telemetry (`src/logger.ts`):

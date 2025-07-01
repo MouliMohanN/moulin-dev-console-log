@@ -20,7 +20,7 @@ suite('Config Test Suite', () => {
                             case 'logFunction': return 'console';
                             case 'enableClassMethodLogging': return false;
                             case 'enableHookLogging': return false;                            case 'logTag': return '// LOG';
-                            case 'wrapInDevCheck': return true;                            case 'showPreview': return false;                                                        case 'enableContextLogging': return false;                            case 'enableReduxContextLogging': return false;                            case 'customLoggerImportStatement': return '';                            case 'sensitiveKeys': return ['secret'];                            case 'ignore': return [];                            case 'filterUnusedVariables': return false;                            case 'enableDuplicatePrevention': return false;
+                            case 'wrapInDevCheck': return true;                                                                                    case 'enableContextLogging': return false;                            case 'enableReduxContextLogging': return false;                            case 'customLoggerImportStatement': return '';                            case 'sensitiveKeys': return ['secret'];                            case 'ignore': return [];                            case 'filterUnusedVariables': return false;                            case 'enableDuplicatePrevention': return false;
                             case 'includeLineNumber': return false;
                             
                             default: return defaultValue;                        }
@@ -45,7 +45,7 @@ suite('Config Test Suite', () => {
         assert.strictEqual(config.enableHookLogging, false);
         assert.strictEqual(config.logTag, '// LOG');
         assert.strictEqual(config.wrapInDevCheck, true);
-        assert.strictEqual(config.showPreview, false);
+        
         
         assert.strictEqual(config.enableContextLogging, false);
         assert.strictEqual(config.enableReduxContextLogging, false);
@@ -69,7 +69,7 @@ suite('Config Test Suite', () => {
             enableHookLogging: true,
             logTag: '// CUSTOM_TAG',
             wrapInDevCheck: false,
-            showPreview: true,
+            
             
             enableContextLogging: true,
             enableReduxContextLogging: true,
@@ -92,7 +92,7 @@ suite('Config Test Suite', () => {
         assert.strictEqual(config.enableHookLogging, true);
         assert.strictEqual(config.logTag, '// CUSTOM_TAG');
         assert.strictEqual(config.wrapInDevCheck, false);
-        assert.strictEqual(config.showPreview, true);
+        
         
         assert.strictEqual(config.enableContextLogging, true);
         assert.strictEqual(config.enableReduxContextLogging, true);
@@ -116,7 +116,7 @@ suite('Config Test Suite', () => {
             enableHookLogging: false,
             logTag: 'TEMP',
             wrapInDevCheck: false,
-            showPreview: false,
+            
             
             enableContextLogging: false,
             enableReduxContextLogging: false,

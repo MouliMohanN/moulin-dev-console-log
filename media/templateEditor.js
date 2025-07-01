@@ -4,8 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const logTemplateInput = document.getElementById('logTemplate');
   const logLevelSelect = document.getElementById('logLevel');
   const logFunctionInput = document.getElementById('logFunction');
-  const previewButton = document.getElementById('previewButton');
-  const logPreviewPre = document.getElementById('logPreview');
+  
 
   window.addEventListener('message', event => {
     const message = event.data;
@@ -18,9 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
           command: 'requestPreview'
         });
         break;
-      case 'showPreview':
-        logPreviewPre.textContent = message.preview;
-        break;
+      
     }
   });
 
@@ -54,14 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  previewButton.addEventListener('click', () => {
-    vscode.postMessage({
-      command: 'requestPreview'
-    });
-  });
+  
 
-  // Request initial preview
-  vscode.postMessage({
-    command: 'requestPreview'
-  });
+  
 });

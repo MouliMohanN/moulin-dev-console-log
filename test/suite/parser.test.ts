@@ -52,7 +52,7 @@ suite('Parser Test Suite', () => {
             enableHookLogging: true,
             logTag: '// @contextual-log',
             wrapInDevCheck: false,
-            showPreview: false,
+            
             
             enableContextLogging: true,
             enableReduxContextLogging: false,
@@ -199,8 +199,7 @@ suite('Parser Test Suite', () => {
     runTest('parseFileForFunctions should identify reducers (useReducer)', () => {
         mockCode = `function MyComponent() {\n  const [state, dispatch] = useReducer(reducer, initialState);\n  console.log(state, dispatch);\n}`;
         const result = parseFileForFunctions(mockCode, doc);
-        console.log(result);
-        logger.log('MouliTesting ', result);
+
         assert.strictEqual(result.length, 1);
         assert.deepStrictEqual(result[0].variables.reducers, ['state']);
     }, { filterUnusedVariables: false });
@@ -208,8 +207,7 @@ suite('Parser Test Suite', () => {
     runTest('parseFileForFunctions should identify redux context (useSelector)', () => {
         mockCode = `function MyComponent() {\n  const data = useSelector(state => state.some.data);\n  console.log(data);\n return <div>{data}</div>;\n}`;
         const result = parseFileForFunctions(mockCode, doc);
-        console.log(result);
-        logger.log('MouliTesting ', result);
+       
         assert.strictEqual(result.length, 1);
         assert.deepStrictEqual(result[0].variables.reduxContext, ['data']);
     }, { enableReduxContextLogging: true, filterUnusedVariables: false });
@@ -217,8 +215,7 @@ suite('Parser Test Suite', () => {
     runTest('parseFileForFunctions should identify context (useContext with member expression)', () => {
         mockCode = `function MyComponent() {\n  const data = useContext(MyContext.SomeData);\n  console.log(data);\n return <div>{data}<\/div>;\n}`;
         const result = parseFileForFunctions(mockCode, doc);
-        console.log(result);
-        logger.log('MouliTesting ', result);
+       
         assert.strictEqual(result.length, 1);
         assert.deepStrictEqual(result[0].variables.context, ['data']);
     }, { enableContextLogging: true, enableReduxContextLogging: false, filterUnusedVariables: false });

@@ -99,49 +99,17 @@ const privateUtils = {
     });
   },
 
-  showPreviewAndConfirm: async function (
-    editor: vscode.TextEditor,
-    edits: { insertPos: vscode.Position; logLine: string }[],
-  ): Promise<boolean> {
-    const tempDocUri = vscode.Uri.parse('untitled:' + editor.document.fileName + '.preview');
-    const tempDoc = await vscode.workspace.openTextDocument(tempDocUri);
-    const tempEditor = await vscode.window.showTextDocument(tempDoc, { preview: true });
-    await privateUtils.insertEdits(tempEditor, edits);
-    await vscode.commands.executeCommand(
-      'vscode.diff',
-      editor.document.uri,
-      tempDocUri,
-      `Preview: ${editor.document.fileName}`,
-    );
-    const confirmation = await vscode.window.showInformationMessage(
-      'Apply these changes?',
-      { modal: true },
-      'Yes',
-      'No',
-    );
-    return confirmation === 'Yes';
-  },
+  
 
-  applyEditsWithPreview: async function (
+  applyEdits: async function (
     editor: vscode.TextEditor,
     edits: { insertPos: vscode.Position; logLine: string }[],
-    showPreview: boolean,
   ): Promise<void> {
     if (edits.length === 0) {
       return;
     }
     const workspaceEdit = privateUtils.createWorkspaceEdit(editor, edits);
-    if (showPreview) {
-      const confirmed = await privateUtils.showPreviewAndConfirm(editor, edits);
-      if (confirmed) {
-        await vscode.workspace.applyEdit(workspaceEdit);
-      } else {
-        logger.info('Log insertion cancelled.');
-      }
-      await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
-    } else {
-      await privateUtils.insertEdits(editor, edits);
-    }
+    await privateUtils.insertEdits(editor, edits);
   },
 
   getNearbyLines: function (doc: vscode.TextDocument, insertPos: vscode.Position, range: number = 2): string[] {
@@ -241,7 +209,7 @@ const privateUtils = {
   ) {
     const finalEdits = await privateUtils.addCustomLoggerImport(doc, edits, config.customLoggerImportStatement);
     if (finalEdits.length > 0) {
-      await privateUtils.applyEditsWithPreview(editor, finalEdits, config.showPreview);
+      await privateUtils.applyEdits(editor, finalEdits);
       logger.info(`Inserted logs for ${finalEdits.length} functions/components.`);
     } else {
       logger.info('No logs were generated for the functions/components in the file.');
@@ -283,7 +251,7 @@ export async function insertLogCommand(): Promise<void> {
 
   const config = getConfiguration();
   const finalEdits = await privateUtils.addCustomLoggerImport(doc, edits, config.customLoggerImportStatement);
-  await privateUtils.applyEditsWithPreview(editor, finalEdits, config.showPreview);
+  await privateUtils.applyEdits(editor, finalEdits);
 }
 
 export async function wrapInConsoleLogCommand(): Promise<void> {

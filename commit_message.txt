@@ -1,1 +1,1 @@
-Remove enableTelemetry feature completely
+Remove showPreview feature completely
