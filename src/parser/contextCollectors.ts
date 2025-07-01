@@ -56,6 +56,7 @@ export function collectVariableDeclaration(
   config: any,
   enableHookLogging: boolean,
   enableReduxContextLogging: boolean,
+  enableContextLogging: boolean,
 ) {
   if (!t.isIdentifier(id) && !t.isArrayPattern(id) && !t.isObjectPattern(id)) {
     return;
@@ -73,9 +74,7 @@ export function collectVariableDeclaration(
         names.forEach((n) => newContext.variables.refs.push(n));
         break;
       case 'useContext':
-        if (enableReduxContextLogging) {
-          names.forEach((n) => newContext.variables.reduxContext.push(n));
-        } else if (init.arguments.length > 0) {
+        if (enableContextLogging) {
           names.forEach((n) => newContext.variables.context.push(n));
         }
         break;

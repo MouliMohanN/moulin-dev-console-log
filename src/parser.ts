@@ -21,7 +21,7 @@ const privateUtils = {
     cursor?: vscode.Position,
   ): CodeContext | CodeContext[] | null {
     const config = getConfiguration();
-    const { enableClassMethodLogging, enableHookLogging, enableReduxContextLogging } = config;
+    const { enableClassMethodLogging, enableHookLogging, enableReduxContextLogging, enableContextLogging } = config;
     const ast = parse(code, {
       sourceType: 'module',
       plugins: ['jsx', 'typescript'],
@@ -67,6 +67,7 @@ const privateUtils = {
                     config,
                     enableHookLogging,
                     enableReduxContextLogging,
+                    enableContextLogging,
                   );
                 });
               }

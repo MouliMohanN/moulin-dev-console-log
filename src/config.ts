@@ -12,6 +12,7 @@ export interface ExtensionConfig {
   wrapInDevCheck: boolean;
   showPreview: boolean;
   enableTelemetry: boolean;
+  enableContextLogging: boolean;
   enableReduxContextLogging: boolean;
   customLoggerImportStatement: string;
   sensitiveKeys: string[];
@@ -37,6 +38,7 @@ let defaultGetConfiguration = (): ExtensionConfig => {
     wrapInDevCheck: config.get<boolean>('wrapInDevCheck', false),
     showPreview: config.get<boolean>('showPreview', false),
     enableTelemetry: config.get<boolean>('enableTelemetry', true),
+    enableContextLogging: config.get<boolean>('enableContextLogging', true),
     enableReduxContextLogging: config.get<boolean>('enableReduxContextLogging', false),
     customLoggerImportStatement: config.get<string>('customLoggerImportStatement', ''),
     sensitiveKeys: config.get<string[]>('sensitiveKeys', ['password', 'token', 'secret', 'api_key']),

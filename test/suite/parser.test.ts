@@ -54,6 +54,7 @@ suite('Parser Test Suite', () => {
             wrapInDevCheck: false,
             showPreview: false,
             enableTelemetry: true,
+            enableContextLogging: true,
             enableReduxContextLogging: false,
             customLoggerImportStatement: '',
             sensitiveKeys: ['password', 'token', 'secret', 'api_key'],
@@ -191,7 +192,7 @@ suite('Parser Test Suite', () => {
         const result = parseFileForFunctions(mockCode, doc);
         assert.strictEqual(result.length, 1);
         assert.deepStrictEqual(result[0].variables.context, ['myContext']);
-    }, { filterUnusedVariables: false });
+    }, { filterUnusedVariables: false, enableContextLogging: true });
 
     runTest('parseFileForFunctions should identify reducers (useReducer)', () => {
         mockCode = `function MyComponent() {\n  const [state, dispatch] = useReducer(reducer, initialState);\n  console.log(state, dispatch);\n}`;
@@ -211,14 +212,14 @@ suite('Parser Test Suite', () => {
         assert.deepStrictEqual(result[0].variables.reduxContext, ['data']);
     }, { enableReduxContextLogging: true, filterUnusedVariables: false });
 
-    runTest('parseFileForFunctions should identify redux context (useContext with member expression)', () => {
-        mockCode = `function MyComponent() {\n  const data = useContext(MyContext.SomeData);\n  console.log(data);\n return <div>{data}</div>;\n}`;
+    runTest('parseFileForFunctions should identify context (useContext with member expression)', () => {
+        mockCode = `function MyComponent() {\n  const data = useContext(MyContext.SomeData);\n  console.log(data);\n return <div>{data}<\/div>;\n}`;
         const result = parseFileForFunctions(mockCode, doc);
         console.log(result);
         logger.log('MouliTesting ', result);
         assert.strictEqual(result.length, 1);
-        assert.deepStrictEqual(result[0].variables.reduxContext, ['data']);
-    }, { enableReduxContextLogging: true, filterUnusedVariables: false });
+        assert.deepStrictEqual(result[0].variables.context, ['data']);
+    }, { enableContextLogging: true, enableReduxContextLogging: false, filterUnusedVariables: false });
 
     runTest('parseFileForFunctions should identify arguments with object destructuring', () => {
         mockCode = 'function myFunction({ a, b }) {\n  console.log(a, b);\n}';
