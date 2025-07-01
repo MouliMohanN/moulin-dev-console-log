@@ -5,7 +5,7 @@ import { CodeContext, VariableBuckets } from '../types';
 import { extractVariableNames } from './variableUtils';
 
 export function createEmptyVariableBuckets(): VariableBuckets {
-  return { props: [], state: [], refs: [], context: [], reducers: [], locals: [], reduxContext: [] };
+  return { props: [], state: [], refs: [], context: [], reducers: [], locals: [], reduxContext: [], args: [] };
 }
 
 export function extractArgs(node: any): string[] {

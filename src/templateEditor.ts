@@ -81,6 +81,7 @@ export function openTemplateEditor(context: vscode.ExtensionContext) {
               reducers: ['reducerR', 'reducerS'],
               locals: ['localV', 'localW'],
               reduxContext: ['reduxC', 'reduxD'],
+              args: ['arg1', 'arg2'],
             },
             insertPos: new vscode.Position(0, 0),
           };

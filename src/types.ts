@@ -8,6 +8,7 @@ export interface VariableBuckets {
   reducers: string[];
   locals: string[];
   reduxContext: string[];
+  args: string[];
 }
 
 export interface CodeContext {

@@ -42,6 +42,8 @@ const privateUtils = {
           let args: string[] = extractArgs(node);
           if (isComponent) {
             variables.props = args;
+          } else {
+            variables.args = args;
           }
           const newContext: CodeContext = {
             type: isComponent ? 'react' : 'function',

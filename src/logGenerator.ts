@@ -10,7 +10,11 @@ export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedI
   const { logTemplate, logLevel, addDebugger, logItems, logFunction, logTag, wrapInDevCheck, includeLineNumber } = config;
   let prefix = logTemplate.replace('${fileName}', fileName).replace('${functionName}', ctx.name);
   if (includeLineNumber) {
-    prefix = prefix.replace('${lineNumber}', ctx.insertPos.line.toString());
+    if (!logTemplate.includes('${lineNumber}')) {
+      prefix += ` > line: ${ctx.insertPos.line.toString()}`;
+    } else {
+      prefix = prefix.replace('${lineNumber}', ctx.insertPos.line.toString());
+    }
   }
   let logObject: string = '';
   if (selectedItems && selectedItems.length > 0) {

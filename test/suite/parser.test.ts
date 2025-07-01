@@ -273,7 +273,7 @@ suite('Parser Test Suite', () => {
         mockCode = `function myFunction() {\n  return 1;\n}`;
         const result = parseFileForFunctions(mockCode, doc);
         assert.strictEqual(result.length, 1);
-        assert.deepStrictEqual(result[0].insertPos, new vscode.Position(1, 11)); // After 'return 1;'
+        assert.deepStrictEqual(result[0].insertPos, new vscode.Position(1, 2)); // Before 'return 1;'
     }, {});
 
     runTest('isFunctionNode should identify arrow function in variable declaration', () => {

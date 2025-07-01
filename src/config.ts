@@ -28,6 +28,11 @@ export let getConfiguration: () => ExtensionConfig;
 // Default implementation
 let defaultGetConfiguration = (): ExtensionConfig => {
   const config = vscode.workspace.getConfiguration('contextualConsoleLog');
+
+  // Debugging logs moved inside the function
+  console.log(`[DEBUG] logFunction: ${config.get<string>('logFunction', 'console')}`);
+  console.log(`[DEBUG] logLevel: ${config.get<string>('logLevel', 'log')}`);
+
   return {
     logTemplate: config.get<string>('logTemplate', '[${fileName} > ${functionName}]'),
     logLevel: config.get<string>('logLevel', 'log'),
@@ -72,3 +77,4 @@ export function onDidChangeConfiguration(
 ): vscode.Disposable {
   return vscode.workspace.onDidChangeConfiguration(callback, thisArgs, disposables);
 }
+
