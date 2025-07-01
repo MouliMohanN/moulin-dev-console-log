@@ -48,7 +48,7 @@ const privateUtils = {
             name,
             args,
             insertPos: new vscode.Position(0, 0),
-            variables: { ...variables },
+            variables: variables,
             parentContext:
               functionContextStack.length > 0 ? functionContextStack[functionContextStack.length - 1] : undefined,
           };

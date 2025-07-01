@@ -14,6 +14,11 @@ export function extractArgs(node: any): string[] {
     node.params.forEach((param: t.LVal) => {
       if (t.isObjectPattern(param) || t.isIdentifier(param) || t.isArrayPattern(param)) {
         args.push(...extractVariableNames(param));
+      } else if (t.isAssignmentPattern(param)) {
+        // Handle default parameters like `function myFunction(a = 1)`
+        if (t.isIdentifier(param.left)) {
+          args.push(param.left.name);
+        }
       }
     });
   }

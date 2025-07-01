@@ -20,7 +20,10 @@ export interface ExtensionConfig {
   enableDuplicatePrevention: boolean;
 }
 
-export function getConfiguration(): ExtensionConfig {
+export let getConfiguration: () => ExtensionConfig;
+
+// Default implementation
+let defaultGetConfiguration = (): ExtensionConfig => {
   const config = vscode.workspace.getConfiguration('contextualConsoleLog');
   return {
     logTemplate: config.get<string>('logTemplate', '[${fileName} > ${functionName}]'),
@@ -41,6 +44,19 @@ export function getConfiguration(): ExtensionConfig {
     filterUnusedVariables: config.get<boolean>('filterUnusedVariables', true),
     enableDuplicatePrevention: config.get<boolean>('enableDuplicatePrevention', true),
   };
+};
+
+// Initialize with default
+getConfiguration = defaultGetConfiguration;
+
+// Setter for tests
+export function setConfiguration(newConfig: () => ExtensionConfig) {
+  getConfiguration = newConfig;
+}
+
+// Reset to default for cleanup
+export function resetConfiguration() {
+  getConfiguration = defaultGetConfiguration;
 }
 
 export function onDidChangeConfiguration(
