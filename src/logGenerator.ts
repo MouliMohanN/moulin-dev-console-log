@@ -1,31 +1,27 @@
+import { getConfiguration } from './config';
+import { formatLogLine } from './logGenerator/logFormatter';
+import { buildLogObject } from './logGenerator/logObjectBuilders';
+import { createSelectedMap, stringifySelectedMap } from './logGenerator/selectedMapHandlers';
 import { CodeContext } from './types';
 
-export function generateConsoleLog(ctx: CodeContext, fileName: string): string {
-  if (ctx.type === 'function') {
-    const argStr = ctx.args.length ? `args: { ${ctx.args.join(', ')} }` : '';
-    return `console.log('[${fileName} > ${ctx.name}]', { ${argStr} });`;
+export function generateConsoleLog(ctx: CodeContext, fileName: string, selectedItems?: string[]): string {
+  const config = getConfiguration();
+  const { logTemplate, logLevel, addDebugger, logItems, logFunction, logTag, wrapInDevCheck, includeLineNumber } =
+    config;
+  let prefix = logTemplate.replace('${fileName}', fileName).replace('${functionName}', ctx.name);
+  if (includeLineNumber) {
+    if (!logTemplate.includes('${lineNumber}')) {
+      prefix += ` > line: ${ctx.insertPos.line.toString()}`;
+    } else {
+      prefix = prefix.replace('${lineNumber}', ctx.insertPos.line.toString());
+    }
   }
-
-  const parts: string[] = [];
-
-  if (ctx.props.length) {
-    parts.push(`props: { ${ctx.props.join(', ')} }`);
+  let logObject: string = '';
+  if (selectedItems && selectedItems.length > 0) {
+    const selectedMap = createSelectedMap(ctx, selectedItems);
+    logObject = stringifySelectedMap(selectedMap);
+  } else {
+    logObject = buildLogObject(ctx, logItems);
   }
-  if (ctx.state.length) {
-    parts.push(`state: { ${ctx.state.join(', ')} }`);
-  }
-  if (ctx.refs.length) {
-    parts.push(`refs: { ${ctx.refs.map((s) => `${s}: ${s}.current`).join(', ')} }`);
-  }
-  if (ctx.context.length) {
-    parts.push(`context: { ${ctx.context.join(', ')} }`);
-  }
-  if (ctx.reducers.length) {
-    parts.push(`reducer: { ${ctx.reducers.join(', ')} }`);
-  }
-  if (ctx.locals.length) {
-    parts.push(`locals: { ${ctx.locals.join(', ')} }`);
-  }
-
-  return `console.log('[${fileName} > ${ctx.name}]', {\n  ${parts.join(',\n  ')}\n});`;
+  return formatLogLine(logFunction, logLevel, prefix, logObject, wrapInDevCheck, logTag, addDebugger);
 }

@@ -1,44 +1,59 @@
 import * as vscode from 'vscode';
-import { generateConsoleLog } from './logGenerator';
+import { cleanLogsCommand, insertLogCommand, insertLogForFileCommand, wrapInConsoleLogCommand } from './commands';
 import { initLogger, logger } from './logger';
-import { parseCodeContext } from './parser';
+import { openTemplateEditor } from './templateEditor';
 
 export function activate(context: vscode.ExtensionContext) {
   initLogger(true);
   logger.log('activate.ts ~ activate Contextual Console Log Extension Activated');
 
-  const disposable = vscode.commands.registerCommand('contextualConsoleLog.insertLog', async () => {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor || editor.selections.length !== 1) {
-      logger.warn(' activate.ts ~ disposable ~ editor.selections: Only single cursor supported.', editor?.selections);
-      return;
-    }
+  // Initialize logging state
+  vscode.commands.executeCommand('setContext', 'contextualConsoleLog.isLoggingEnabled', true);
 
-    const doc = editor.document;
-    const cursor = editor.selection.active;
-    const code = doc.getText();
-    //   const fileName = doc.fileName.split(/[/\\]/).pop() || 'Unknown';
-    const fileName = vscode.workspace.asRelativePath(doc.uri);
+  // Create status bar item
+  const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  statusBarItem.command = 'contextualConsoleLog.toggleLogging';
+  statusBarItem.tooltip = 'Toggle Contextual Log Insertion';
+  statusBarItem.text = '$(check) Log';
+  statusBarItem.show();
 
-    try {
-      const contextInfo = parseCodeContext(code, cursor, doc);
-
-      if (!contextInfo) {
-        logger.warn('No valid context found for logging.', { doc, cursor, code, fileName });
-        return;
-      }
-
-      const logLine = generateConsoleLog(contextInfo, fileName);
-
-      await editor.edit((editBuilder) => {
-        editBuilder.insert(contextInfo.insertPos, logLine + '\n');
-      });
-    } catch (err) {
-      logger.error('Console log generation failed: ' + (err as Error).message);
-    }
+  // Register toggle command
+  const toggleLoggingDisposable = vscode.commands.registerCommand('contextualConsoleLog.toggleLogging', () => {
+    const currentState = context.globalState.get('contextualConsoleLog.isLoggingEnabled', true);
+    vscode.commands.executeCommand('setContext', 'contextualConsoleLog.isLoggingEnabled', !currentState);
+    statusBarItem.text = !currentState ? '$(check) Log' : '$(x) Log';
+    logger.info(`Contextual Log Insertion ${!currentState ? 'Enabled' : 'Disabled'}.`);
   });
 
-  context.subscriptions.push(disposable);
+  const insertLogDisposable = vscode.commands.registerCommand('contextualConsoleLog.insertLog', insertLogCommand);
+
+  const wrapInConsoleLogDisposable = vscode.commands.registerCommand(
+    'contextualConsoleLog.wrapInConsoleLog',
+    wrapInConsoleLogCommand,
+  );
+
+  const cleanLogsDisposable = vscode.commands.registerCommand('contextualConsoleLog.cleanLogs', cleanLogsCommand);
+
+  const insertLogForFileDisposable = vscode.commands.registerCommand(
+    'contextualConsoleLog.insertLogForFile',
+    insertLogForFileCommand,
+  );
+
+  const openTemplateEditorDisposable = vscode.commands.registerCommand('contextualConsoleLog.openTemplateEditor', () =>
+    openTemplateEditor(context),
+  );
+
+  context.subscriptions.push(
+    insertLogDisposable,
+    wrapInConsoleLogDisposable,
+    cleanLogsDisposable,
+    insertLogForFileDisposable,
+    statusBarItem,
+    toggleLoggingDisposable,
+    openTemplateEditorDisposable,
+  );
 }
 
-export function deactivate() {}
+export function deactivate() {
+  // No specific cleanup needed for now, as functions don't manage resources requiring explicit disposal.
+}
