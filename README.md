@@ -611,6 +611,7 @@ Here are the default values for all configuration options, as defined in `packag
   "contextualConsoleLog.enableHookLogging": true,
   "contextualConsoleLog.logTag": "",
   "contextualConsoleLog.wrapInDevCheck": false,
+  "contextualConsoleLog.enableContextLogging": true,
   "contextualConsoleLog.enableReduxContextLogging": false,
   "contextualConsoleLog.customLoggerImportStatement": "",
   "contextualConsoleLog.sensitiveKeys": ["password", "token", "secret", "api_key"],
