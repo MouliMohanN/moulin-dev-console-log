@@ -135,6 +135,11 @@
           "default": false,
           "description": "Wrap inserted logs in an environment check (e.g., `if (process.env.NODE_ENV !== 'production')`)."
         },
+        "contextualConsoleLog.enableContextLogging": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable logging for React Context API variables (e.g., `useContext`)."
+        },
         "contextualConsoleLog.enableReduxContextLogging": {
           "type": "boolean",
           "default": false,
