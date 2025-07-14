@@ -192,7 +192,7 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run package",
+    "prepublishOnly": "npm run package",
     "compile": "npm run check-types && npm run lint && node esbuild.js",
     "clean-compile": "npm run clean && npm run compile",
     "watch": "npm-run-all -p watch:*",
@@ -207,7 +207,9 @@
     "lint": "eslint src --fix",
     "prettier:write": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
     "test": "vscode-test",
-    "coverage": "nyc --all --include='out/src/**/*.js' --extension .js --sourceMap=true --reporter=lcov --reporter=text vscode-test"
+    "coverage": "nyc --all --include='out/src/**/*.js' --extension .js --sourceMap=true --reporter=lcov --reporter=text vscode-test",
+    "publish": "vsce publish",
+    "release": "npm version patch && git push --follow-tags"
   },
   "devDependencies": {
     "@eslint/js": "9.29.0",
