@@ -2,9 +2,10 @@
   "name": "moulin-dev-console-log",
   "displayName": "contextual-console-log",
   "description": "Generate contextual Console.log statements",
+  "publisher": "moulin-dev",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/moulin-dev-console-log.git"
+    "url": "https://github.com/MouliMohanN/moulin-dev-console-log.git"
   },
   "version": "0.1.1",
   "engines": {
