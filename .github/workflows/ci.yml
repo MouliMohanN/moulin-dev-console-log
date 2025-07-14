@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: [master]
   pull_request:
     branches: [master]
 
@@ -23,4 +21,9 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run lint
-      - run: npm test
+
+      - name: Install xvfb
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+
+      - name: Run tests (headless)
+        run: xvfb-run -a npm test
