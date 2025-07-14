@@ -202,7 +202,7 @@
     "compile-tests": "tsc -p tsconfig.json --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run clean && npm run compile-tests && npm run compile && npm run lint",
-    "clean": "(if exist out (rd /s /q out)) && (if exist dist (rd /s /q dist))",
+    "clean": "rimraf out dist",
     "check-types": "tsc --noEmit",
     "lint": "eslint src --fix",
     "prettier:write": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,scss,md}\"",
@@ -228,6 +228,7 @@
     "nyc": "^17.1.0",
     "prettier": "3.6.2",
     "prettier-plugin-organize-imports": "^4.1.0",
+    "rimraf": "^6.0.1",
     "typescript": "^5.8.3",
     "typescript-eslint": "8.35.0"
   },
